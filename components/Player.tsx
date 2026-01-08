@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Clapperboard, Pencil } from 'lucide-react';
+import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Clapperboard, Pencil, FileText } from 'lucide-react';
 import { Movie } from '../types';
 import { MovieCard } from './MovieCard';
 
@@ -68,23 +68,24 @@ export const Player: React.FC<PlayerProps> = ({
       </div>
 
       {/* Hero Content / Player Area */}
-      <div className="relative w-full h-[70vh] md:h-[85vh] bg-black group">
+      {/* CHANGE: Changed h-[70vh] to min-h-[70vh] and removed flex items-center centering to prevent cut-off text on mobile */}
+      <div className="relative w-full min-h-[70vh] md:h-[85vh] bg-black group flex flex-col justify-end md:justify-center">
          
          {/* Background Image with Cinematic Grade */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 z-0">
             <img 
                 src={movie.posterUrl} 
                 alt="Background" 
                 className="w-full h-full object-cover object-top"
             />
             {/* Complex Gradients for readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#0a0a0a]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-[#0a0a0a]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent md:hidden" /> {/* Extra bottom fade for mobile */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
         </div>
 
         {/* Content Container */}
-        <div className="absolute inset-0 flex items-center">
-            <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full mt-20">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 w-full pt-32 pb-12 md:py-0">
                 <div className="max-w-3xl animate-fade-in flex flex-col gap-6">
                     
                     {/* Title */}
@@ -106,10 +107,15 @@ export const Player: React.FC<PlayerProps> = ({
                         <span className="text-gray-300">{movie.genre.join(', ')}</span>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl font-light">
-                        {movie.description}
-                    </p>
+                    {/* Description - Added explicit visibility control and label */}
+                    <div className="bg-black/20 backdrop-blur-sm p-4 rounded-xl border border-white/5 md:bg-transparent md:p-0 md:border-0">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2 md:hidden">
+                             <FileText className="h-3 w-3" /> Sinopsis
+                        </h3>
+                        <p className="text-gray-200 md:text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl font-light">
+                            {movie.description || "Sin descripción disponible."}
+                        </p>
+                    </div>
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-4 pt-2">
@@ -139,7 +145,6 @@ export const Player: React.FC<PlayerProps> = ({
                     </div>
 
                 </div>
-            </div>
         </div>
       </div>
       

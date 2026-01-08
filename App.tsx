@@ -365,7 +365,15 @@ const INITIAL_MOVIES: Movie[] = [
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  
+  // Use localStorage to check if disclaimer was already accepted
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('samstudios_disclaimer_v1') === 'true';
+    }
+    return false;
+  });
+
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   
@@ -547,12 +555,18 @@ const App = () => {
       await supabase.auth.signOut();
   };
 
+  // Handle Accept Disclaimer
+  const handleAcceptDisclaimer = () => {
+      localStorage.setItem('samstudios_disclaimer_v1', 'true');
+      setDisclaimerAccepted(true);
+  };
+
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   if (!disclaimerAccepted) {
-    return <DisclaimerModal onAccept={() => setDisclaimerAccepted(true)} />;
+    return <DisclaimerModal onAccept={handleAcceptDisclaimer} />;
   }
 
   if (currentView === ViewState.PLAYER && selectedMovie) {
