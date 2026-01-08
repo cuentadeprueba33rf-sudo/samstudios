@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
-import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Clapperboard, Pencil, FileText } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Pencil, FileText } from 'lucide-react';
 import { Movie } from '../types';
-import { MovieCard } from './MovieCard';
 
 interface PlayerProps {
   movie: Movie;
@@ -18,9 +17,7 @@ interface PlayerProps {
 
 export const Player: React.FC<PlayerProps> = ({ 
   movie, 
-  allMovies, 
   onBack, 
-  onMovieClick,
   isLiked, 
   isInMyList, 
   onToggleLike, 
@@ -34,14 +31,6 @@ export const Player: React.FC<PlayerProps> = ({
         window.open(movie.streamUrl, '_blank', 'noopener,noreferrer');
     }
   };
-
-  // Logic for "More like this"
-  const recommendations = useMemo(() => {
-    return allMovies.filter(m => 
-        m.id !== movie.id && // Exclude current movie
-        m.genre.some(g => movie.genre.includes(g)) // Must share at least one genre
-    ).slice(0, 10); // Limit to 10
-  }, [movie, allMovies]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-y-auto pb-20 font-sans">
@@ -68,7 +57,6 @@ export const Player: React.FC<PlayerProps> = ({
       </div>
 
       {/* Hero Content / Player Area */}
-      {/* CHANGE: Changed h-[70vh] to min-h-[70vh] and removed flex items-center centering to prevent cut-off text on mobile */}
       <div className="relative w-full min-h-[70vh] md:h-[85vh] bg-black group flex flex-col justify-end md:justify-center">
          
          {/* Background Image with Cinematic Grade */}
@@ -107,7 +95,7 @@ export const Player: React.FC<PlayerProps> = ({
                         <span className="text-gray-300">{movie.genre.join(', ')}</span>
                     </div>
 
-                    {/* Description - Added explicit visibility control and label */}
+                    {/* Description */}
                     <div className="bg-black/20 backdrop-blur-sm p-4 rounded-xl border border-white/5 md:bg-transparent md:p-0 md:border-0">
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2 md:hidden">
                              <FileText className="h-3 w-3" /> Sinopsis
@@ -152,7 +140,7 @@ export const Player: React.FC<PlayerProps> = ({
       <div className="max-w-7xl mx-auto px-6 sm:px-10 py-12 relative z-10">
          
          {/* Cast & Crew Section */}
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16 border-t border-white/10 pt-10">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 border-t border-white/10 pt-10">
             <div className="col-span-2">
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                     <Users className="h-5 w-5 text-brand-500" /> Reparto y Equipo
@@ -199,21 +187,6 @@ export const Player: React.FC<PlayerProps> = ({
                  </div>
             </div>
          </div>
-
-         {/* More Like This Section */}
-         {recommendations.length > 0 && (
-             <div className="animate-fade-in-up">
-                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Clapperboard className="h-6 w-6 text-brand-500" />
-                    Más como esto
-                 </h2>
-                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-                    {recommendations.map(recMovie => (
-                        <MovieCard key={recMovie.id} movie={recMovie} onClick={onMovieClick} />
-                    ))}
-                 </div>
-             </div>
-         )}
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Side: Search & Profile */}
-          <div className={`flex items-center gap-2 sm:gap-6 ${mobileSearchActive ? 'w-full' : ''}`}>
+          <div className={`flex items-center gap-2 sm:gap-4 ${mobileSearchActive ? 'w-full' : ''}`}>
             
             <div className={`flex items-center transition-all bg-black/40 border border-white/10 hover:border-white/30 rounded-full px-2 py-1 ${mobileSearchActive ? 'w-full' : ''}`}>
                 <Search 
@@ -66,29 +66,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <input
                     type="text"
                     className={`bg-transparent border-none focus:ring-0 text-white text-sm placeholder-gray-400 transition-all duration-300 outline-none ml-2 ${searchTerm || mobileSearchActive ? 'w-full sm:w-64' : 'w-0 sm:focus:w-64 focus:w-32'}`}
-                    placeholder="Títulos, géneros..."
+                    placeholder="Buscar..."
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
                     onBlur={() => !searchTerm && setMobileSearchActive(false)}
                 />
                 {mobileSearchActive && (
                     <button onClick={() => { setMobileSearchActive(false); onSearchChange(''); }} className="sm:hidden p-1">
-                         <span className="text-xs text-gray-400">Cancel</span>
+                         <span className="text-xs text-gray-400">X</span>
                     </button>
                 )}
             </div>
 
             {!mobileSearchActive && (
                 <>
-                    {/* Request Button */}
+                    {/* Request Button - Now visible on mobile too */}
                     {onRequestClick && (
                         <button 
                             onClick={onRequestClick}
-                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-xs md:text-sm font-medium text-gray-200"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-xs md:text-sm font-medium text-gray-200 group"
                             title="Pedir una película o serie"
                         >
-                            <MessageSquarePlus className="h-4 w-4 text-brand-500" />
-                            <span>Pedir</span>
+                            <MessageSquarePlus className="h-4 w-4 md:h-5 md:w-5 text-brand-500 group-hover:scale-110 transition-transform" />
+                            <span className="hidden xs:inline">Pedir</span>
                         </button>
                     )}
 
@@ -96,17 +96,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {isAdmin && (
                       <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
                           <Plus className="h-4 w-4" /> 
-                          <span className="hidden sm:inline">Admin Add</span>
+                          <span className="hidden sm:inline">Add</span>
                       </button>
                     )}
                     
-                    <Bell className="h-5 w-5 text-gray-200 hover:text-white cursor-pointer hidden sm:block" />
-                    
                     <div 
                       onClick={onUserClick}
-                      className={`h-7 w-7 sm:h-8 sm:w-8 rounded flex items-center justify-center cursor-pointer transition-colors ${isAdmin ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500'}`}
+                      className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${isAdmin ? 'bg-red-600 hover:bg-red-500 shadow-[0_0_10px_rgba(229,9,20,0.5)]' : 'bg-gray-800 hover:bg-gray-700 border border-white/10'}`}
                     >
-                        {isAdmin ? <LogOut className="h-4 w-4 sm:h-5 sm:w-5 text-white" /> : <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                        {isAdmin ? <LogOut className="h-4 w-4 text-white" /> : <User className="h-4 w-4 text-white" />}
                     </div>
                 </>
             )}

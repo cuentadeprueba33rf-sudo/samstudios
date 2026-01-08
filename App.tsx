@@ -14,7 +14,7 @@ import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3
 import { supabase } from './services/supabaseClient'; 
 
 // CONFIG
-const ADMIN_EMAIL = "admin@samstudios.com"; // CAMBIA ESTO POR TU EMAIL REAL
+const ADMIN_EMAIL = "samuelcasseresbx@gmail.com"; 
 
 // INITIAL DATA - SEED DATA
 const INITIAL_MOVIES: Movie[] = [
@@ -238,7 +238,7 @@ const INITIAL_MOVIES: Movie[] = [
   {
     id: 'baby-serie',
     title: 'Baby',
-    description: 'Un grupo de adolescentes de la élite de Roma lleva una doble vida secreta que rompe con las apariencias.',
+    description: 'Un grupo de adolescentes de la élite de Roma lleva una doble vida secreta que rompe con las appearances.',
     year: '2018',
     genre: ['Serie', 'Drama', 'Romance', 'Juvenil'],
     posterUrl: 'https://es.web.img2.acsta.net/pictures/20/08/26/09/34/3778371.jpg',
