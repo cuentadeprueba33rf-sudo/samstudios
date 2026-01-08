@@ -7,10 +7,14 @@ import { Player } from './components/Player';
 import { SplashScreen } from './components/SplashScreen';
 import { TopActorsRow } from './components/TopActorsRow';
 import { DisclaimerModal } from './components/DisclaimerModal';
-import { LoginModal } from './components/LoginModal'; 
+import { LoginModal } from './components/LoginModal';
+import { RequestModal } from './components/RequestModal'; 
 import { Movie, ViewState } from './types';
 import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3 } from 'lucide-react';
 import { supabase } from './services/supabaseClient'; 
+
+// CONFIG
+const ADMIN_EMAIL = "admin@samstudios.com"; // CAMBIA ESTO POR TU EMAIL REAL
 
 // INITIAL DATA - SEED DATA
 const INITIAL_MOVIES: Movie[] = [
@@ -367,6 +371,7 @@ const App = () => {
   const [showSplash, setShowSplash] = useState(true);
   
   // Use localStorage to check if disclaimer was already accepted
+  // FIX: Persist acceptance state to prevent showing on reload
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
     if (typeof window !== 'undefined') {
         return localStorage.getItem('samstudios_disclaimer_v1') === 'true';
@@ -413,17 +418,14 @@ const App = () => {
         
         if (!error && data) {
             if (data.length > 5) {
-                // If DB has significant data, USE DB ONLY. This fixes the deletion issue.
                 setMovies(data);
                 setUsingLocalData(false);
             } else {
-                // If DB is empty or almost empty, merge or use local to show something
-                // Priority Strategy: Supabase Data > Hardcoded Data
                 const movieMap = new Map<string, Movie>();
                 INITIAL_MOVIES.forEach(m => movieMap.set(m.id, m));
                 data.forEach((m: any) => movieMap.set(m.id, m));
                 setMovies(Array.from(movieMap.values()));
-                setUsingLocalData(true); // Still relying on local data partially
+                setUsingLocalData(true);
             }
         } else {
             console.error("Error fetching movies:", error);
@@ -431,38 +433,26 @@ const App = () => {
         }
   };
 
-  // 2. Fetch Movies from Supabase on Mount
   useEffect(() => {
     fetchMovies();
   }, []);
 
-  // NEW: Function to upload INITIAL_MOVIES to Supabase (One-time sync)
   const handleSyncCatalog = async () => {
       if (!confirm("Esto subirá todas las películas 'base' a tu base de datos Supabase. ¿Continuar?")) return;
       
       setSyncLoading(true);
       try {
-          // Prepare data: Remove 'id' so Supabase generates unique UUIDs to avoid conflicts
-          // Or keep IDs if they are valid text, but safer to let Supabase handle if they are new
-          
-          // Current strategy: Upsert based on Title to avoid duplicates if run twice
           const moviesToUpload = INITIAL_MOVIES.map(m => {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { id, ...rest } = m; // Remove ID to allow new UUID generation or handle externally
+              const { id, ...rest } = m; 
               return {
                   ...rest,
-                  // We need to ensure required fields for Supabase match the Typescript type
                   genre: m.genre || [],
                   actors: m.actors || []
               };
           });
 
-          // Insert one by one or bulk. Using upsert on ID won't work if IDs are different.
-          // We will attempt to insert. If exact title exists, we skip? 
-          // Simplest for "Free Cloud": Just Insert.
-          
           for (const movie of moviesToUpload) {
-             // Check if exists by title to avoid duplicates
              const { data } = await supabase.from('movies').select('id').eq('title', movie.title).single();
              if (!data) {
                  await supabase.from('movies').insert(movie);
@@ -470,7 +460,7 @@ const App = () => {
           }
           
           alert("¡Catálogo sincronizado con éxito! Ahora tus cambios serán permanentes.");
-          fetchMovies(); // Reload to switch to DB-only mode
+          fetchMovies(); 
 
       } catch (e: any) {
           alert("Error sincronizando: " + e.message);
@@ -487,7 +477,6 @@ const App = () => {
     );
   }, [movies, searchTerm]);
 
-  // Construct the specific Trending List dynamically based on ranking
   const trendingMovies = useMemo(() => {
     return movies
       .filter(m => m.trendingRank && m.trendingRank > 0)
@@ -510,7 +499,6 @@ const App = () => {
   };
 
   const handleSaveMovie = (savedMovie: Movie) => {
-    // Optimistic update
     setMovies(prev => {
         const exists = prev.find(m => m.id === savedMovie.id);
         if (exists) {
@@ -518,27 +506,19 @@ const App = () => {
         }
         return [savedMovie, ...prev];
     });
-    // If we were editing, go back to player to see changes
     if (currentView === ViewState.EDIT_MOVIE) {
         setSelectedMovie(savedMovie);
         setCurrentView(ViewState.PLAYER);
     }
-    // Re-fetch to ensure sync with DB (ID generation etc)
     fetchMovies();
   };
 
   const handleDeleteMovie = async (movieId: string) => {
-      // 1. Delete from Supabase
       const { error } = await supabase.from('movies').delete().eq('id', movieId);
-      
       if (error) {
           throw new Error(error.message);
       }
-
-      // 2. Remove from Local State immediately
       setMovies(prev => prev.filter(m => m.id !== movieId));
-      
-      // 3. Reset View
       setSelectedMovie(null);
       setCurrentView(ViewState.HOME);
   };
@@ -593,6 +573,7 @@ const App = () => {
         onHomeClick={() => { setCurrentView(ViewState.HOME); setSearchTerm(''); }}
         onMyListClick={() => setCurrentView(ViewState.MY_LIST)}
         onUserClick={() => isAdmin ? handleLogout() : setCurrentView(ViewState.LOGIN)}
+        onRequestClick={() => setCurrentView(ViewState.REQUEST)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         isAdmin={isAdmin}
@@ -602,6 +583,13 @@ const App = () => {
         <LoginModal 
             onClose={() => setCurrentView(ViewState.HOME)}
             onLoginSuccess={() => setCurrentView(ViewState.HOME)}
+        />
+      )}
+
+      {currentView === ViewState.REQUEST && (
+        <RequestModal 
+            onClose={() => setCurrentView(ViewState.HOME)}
+            adminEmail={ADMIN_EMAIL}
         />
       )}
 

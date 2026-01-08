@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Bell, User, LogOut } from 'lucide-react';
+import { Plus, Search, Bell, User, LogOut, MessageSquarePlus } from 'lucide-react';
 
 interface NavbarProps {
   onAddClick: () => void;
   onHomeClick: () => void;
   onMyListClick: () => void;
   onUserClick: () => void;
+  onRequestClick?: () => void;
   searchTerm: string;
   onSearchChange: (val: string) => void;
   isAdmin: boolean;
@@ -16,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onHomeClick, 
   onMyListClick, 
   onUserClick,
+  onRequestClick,
   searchTerm, 
   onSearchChange,
   isAdmin
@@ -78,6 +80,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {!mobileSearchActive && (
                 <>
+                    {/* Request Button */}
+                    {onRequestClick && (
+                        <button 
+                            onClick={onRequestClick}
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-xs md:text-sm font-medium text-gray-200"
+                            title="Pedir una película o serie"
+                        >
+                            <MessageSquarePlus className="h-4 w-4 text-brand-500" />
+                            <span>Pedir</span>
+                        </button>
+                    )}
+
                     {/* Only show Add button if Admin */}
                     {isAdmin && (
                       <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
