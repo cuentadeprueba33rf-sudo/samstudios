@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Clapperboard, Pencil, X } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ArrowLeft, Play, Plus, ThumbsUp, Check, Star, Users, Clapperboard, Pencil } from 'lucide-react';
 import { Movie } from '../types';
 import { MovieCard } from './MovieCard';
 
@@ -12,8 +12,8 @@ interface PlayerProps {
   isInMyList: boolean;
   onToggleLike: () => void;
   onToggleMyList: () => void;
-  isAdmin?: boolean; // New prop
-  onEdit?: (movie: Movie) => void; // New prop
+  isAdmin?: boolean;
+  onEdit?: (movie: Movie) => void;
 }
 
 export const Player: React.FC<PlayerProps> = ({ 
@@ -28,14 +28,11 @@ export const Player: React.FC<PlayerProps> = ({
   isAdmin,
   onEdit
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
   
   const handlePlayClick = () => {
-    setIsPlaying(true);
-  };
-
-  const handleClosePlayer = () => {
-    setIsPlaying(false);
+    if (movie.streamUrl) {
+        window.open(movie.streamUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   // Logic for "More like this"
@@ -59,7 +56,7 @@ export const Player: React.FC<PlayerProps> = ({
           </button>
 
           {/* EDIT BUTTON FOR ADMINS */}
-          {isAdmin && onEdit && !isPlaying && (
+          {isAdmin && onEdit && (
               <button 
                 onClick={() => onEdit(movie)}
                 className="pointer-events-auto flex items-center justify-center bg-brand-500 hover:bg-red-600 text-white transition-all rounded-full p-3 shadow-lg animate-fade-in"
@@ -73,97 +70,77 @@ export const Player: React.FC<PlayerProps> = ({
       {/* Hero Content / Player Area */}
       <div className="relative w-full h-[70vh] md:h-[85vh] bg-black group">
          
-         {isPlaying ? (
-             <div className="absolute inset-0 z-40 bg-black animate-fade-in">
-                 <iframe 
-                    src={movie.streamUrl} 
-                    className="w-full h-full border-none"
-                    allowFullScreen
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    title={movie.title}
-                 />
-                 <button 
-                    onClick={handleClosePlayer}
-                    className="absolute top-6 right-6 z-50 bg-black/50 hover:bg-white/20 text-white p-2 rounded-full backdrop-blur-md transition-colors border border-white/10"
-                 >
-                    <X className="h-6 w-6" />
-                 </button>
-             </div>
-         ) : (
-             <>
-                {/* Background Image with Cinematic Grade */}
-                <div className="absolute inset-0">
-                    <img 
-                        src={movie.posterUrl} 
-                        alt="Background" 
-                        className="w-full h-full object-cover object-top"
-                    />
-                    {/* Complex Gradients for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#0a0a0a]" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-                </div>
+         {/* Background Image with Cinematic Grade */}
+        <div className="absolute inset-0">
+            <img 
+                src={movie.posterUrl} 
+                alt="Background" 
+                className="w-full h-full object-cover object-top"
+            />
+            {/* Complex Gradients for readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#0a0a0a]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+        </div>
 
-                {/* Content Container */}
-                <div className="absolute inset-0 flex items-center">
-                    <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full mt-20">
-                        <div className="max-w-3xl animate-fade-in flex flex-col gap-6">
-                            
-                            {/* Title */}
-                            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white drop-shadow-2xl leading-[1.1]">
-                                {movie.title}
-                            </h1>
+        {/* Content Container */}
+        <div className="absolute inset-0 flex items-center">
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full mt-20">
+                <div className="max-w-3xl animate-fade-in flex flex-col gap-6">
+                    
+                    {/* Title */}
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white drop-shadow-2xl leading-[1.1]">
+                        {movie.title}
+                    </h1>
 
-                            {/* Meta Data Pill */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-200">
-                                <div className="flex items-center gap-1 text-yellow-400">
-                                    <Star className="h-4 w-4 fill-yellow-400" />
-                                    <span>{movie.rating}</span>
-                                </div>
-                                <span className="text-gray-400">•</span>
-                                <span>{movie.year}</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="px-2 py-0.5 border border-white/20 rounded text-xs bg-white/5 backdrop-blur-md">HD</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="text-gray-300">{movie.genre.join(', ')}</span>
-                            </div>
+                    {/* Meta Data Pill */}
+                    <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-200">
+                        <div className="flex items-center gap-1 text-yellow-400">
+                            <Star className="h-4 w-4 fill-yellow-400" />
+                            <span>{movie.rating}</span>
+                        </div>
+                        <span className="text-gray-400">•</span>
+                        <span>{movie.year}</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="px-2 py-0.5 border border-white/20 rounded text-xs bg-white/5 backdrop-blur-md">HD</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="text-gray-300">{movie.genre.join(', ')}</span>
+                    </div>
 
-                            {/* Description */}
-                            <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl font-light">
-                                {movie.description}
-                            </p>
+                    {/* Description */}
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl font-light">
+                        {movie.description}
+                    </p>
 
-                            {/* Actions */}
-                            <div className="flex flex-wrap gap-4 pt-2">
-                                <button 
-                                    onClick={handlePlayClick}
-                                    className="flex items-center justify-center px-8 py-4 bg-white text-black font-bold text-lg rounded-lg hover:bg-gray-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                                >
-                                    <Play className="h-6 w-6 mr-3 fill-black" />
-                                    Ver Ahora
-                                </button>
-                                
-                                <div className="flex gap-3">
-                                    <button 
-                                        onClick={onToggleMyList}
-                                        className={`flex items-center justify-center px-6 py-4 rounded-lg font-medium transition-all active:scale-95 border ${isInMyList ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-white/10 border-white/10 hover:bg-white/20 text-white'}`}
-                                    >
-                                        {isInMyList ? <Check className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
-                                    </button>
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-4 pt-2">
+                        <button 
+                            onClick={handlePlayClick}
+                            className="flex items-center justify-center px-8 py-4 bg-white text-black font-bold text-lg rounded-lg hover:bg-gray-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                        >
+                            <Play className="h-6 w-6 mr-3 fill-black" />
+                            Ver Ahora
+                        </button>
+                        
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={onToggleMyList}
+                                className={`flex items-center justify-center px-6 py-4 rounded-lg font-medium transition-all active:scale-95 border ${isInMyList ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-white/10 border-white/10 hover:bg-white/20 text-white'}`}
+                            >
+                                {isInMyList ? <Check className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
+                            </button>
 
-                                    <button 
-                                        onClick={onToggleLike}
-                                        className={`flex items-center justify-center px-6 py-4 rounded-lg font-medium transition-all active:scale-95 border ${isLiked ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-white/10 border-white/10 hover:bg-white/20 text-white'}`}
-                                    >
-                                        <ThumbsUp className={`h-6 w-6 ${isLiked ? 'fill-blue-400' : ''}`} />
-                                    </button>
-                                </div>
-                            </div>
-
+                            <button 
+                                onClick={onToggleLike}
+                                className={`flex items-center justify-center px-6 py-4 rounded-lg font-medium transition-all active:scale-95 border ${isLiked ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-white/10 border-white/10 hover:bg-white/20 text-white'}`}
+                            >
+                                <ThumbsUp className={`h-6 w-6 ${isLiked ? 'fill-blue-400' : ''}`} />
+                            </button>
                         </div>
                     </div>
+
                 </div>
-             </>
-         )}
+            </div>
+        </div>
       </div>
       
       {/* Details Grid */}
