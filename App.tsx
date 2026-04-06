@@ -9,6 +9,7 @@ import { TopActorsRow } from './components/TopActorsRow';
 import { DisclaimerModal } from './components/DisclaimerModal';
 import { LoginModal } from './components/LoginModal';
 import { RequestModal } from './components/RequestModal'; 
+import { ConstructionNotification } from './components/ConstructionNotification';
 import { Movie, ViewState } from './types';
 import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3 } from 'lucide-react';
 import { db, auth } from './services/firebase';
@@ -619,6 +620,7 @@ const App = () => {
         </div>
       ) : (
         <>
+           <ConstructionNotification />
            {/* ADMIN DASHBOARD BANNER */}
            {isAdmin && usingLocalData && !searchTerm && (
              <div className="pt-20 px-4 md:px-8">
@@ -652,9 +654,11 @@ const App = () => {
                             <div className="absolute inset-0">
                                 <img src={featured.posterUrl} className="w-full h-full object-cover object-top" alt={featured.title} />
                                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black to-transparent" />
                             </div>
-                            <div className="absolute bottom-[15%] left-4 md:left-12 max-w-2xl space-y-6 animate-fade-in-up">
+                            <div className="absolute bottom-[20%] left-4 md:left-12 max-w-2xl space-y-6 animate-fade-in-up">
                                 <h1 className="text-5xl md:text-8xl font-black drop-shadow-2xl font-display tracking-tighter leading-none">{featured.title}</h1>
                                 {featured.snippet && (
                                     <p className="text-xl md:text-2xl font-medium text-white italic drop-shadow-md">
@@ -683,25 +687,9 @@ const App = () => {
              </div>
            )}
 
-           <div className={`relative z-10 pb-20 ${!searchTerm ? '-mt-32' : 'pt-24'}`}>
-              
+           <div className={`relative z-10 pb-20 ${!searchTerm ? '-mt-16' : 'pt-24'}`}>
               {!searchTerm && (
                 <>
-                    {/* Construction Banner */}
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 border-l-4 border-yellow-500 rounded-r-lg p-4 shadow-lg flex items-start gap-4 animate-fade-in">
-                            <div className="bg-yellow-500/10 p-2 rounded-full shrink-0">
-                                <Construction className="h-6 w-6 text-yellow-500" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-white font-bold text-sm md:text-base">Catálogo en Construcción</h3>
-                                <p className="text-gray-400 text-xs md:text-sm mt-1">
-                                    Aún no están todas las películas, pero estamos agregando contenido <strong>todos los días</strong>. 
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     <TopActorsRow isAdmin={isAdmin} />
                 </>
               )}
