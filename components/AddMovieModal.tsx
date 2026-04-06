@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Wand2, Loader2, Link as LinkIcon, Image as ImageIcon, Trophy, Save, Trash2, AlertTriangle, FileText, Calendar, Star, Clapperboard, MonitorPlay, Zap } from 'lucide-react';
-import { generateMovieMetadata } from '../services/geminiService';
+import { X, Loader2, Link as LinkIcon, Image as ImageIcon, Trophy, Save, Trash2, AlertTriangle, FileText, Calendar, Star, Clapperboard, MonitorPlay, Zap } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { Movie } from '../types';
@@ -28,7 +27,6 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
   const [resolving, setResolving] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState('');
-  const [autoMode, setAutoMode] = useState(true);
   const [status, setStatus] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -43,7 +41,6 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
         setYear(movieToEdit.year);
         setGenre(movieToEdit.genre.join(', '));
         setRating(movieToEdit.rating.toString());
-        setAutoMode(false);
     }
   }, [movieToEdit]);
 
@@ -79,7 +76,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
     }, 1000);
   };
 
-  const handleSmartGenerateAndSave = async () => {
+  const handleSave = async () => {
     if (!title) {
         setError("Por favor escribe el título.");
         return;
@@ -92,17 +89,6 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
       let finalYear = year;
       let finalGenre: string[] = genre.split(',').map(g => g.trim()).filter(g => g);
       let finalRating = parseFloat(rating) || 0;
-      let finalImdbId = '';
-
-      if (autoMode && !movieToEdit) {
-          setStatus('Sincronizando con IA...');
-          const metadata = await generateMovieMetadata(title);
-          finalDescription = metadata.description;
-          finalYear = metadata.year;
-          finalGenre = metadata.genre;
-          finalRating = metadata.rating;
-          finalImdbId = metadata.imdbId || '';
-      } 
 
       const finalStreamUrl = streamUrl || (movieToEdit ? movieToEdit.streamUrl : '');
       const finalPosterUrl = posterUrl || (movieToEdit ? movieToEdit.posterUrl : `https://picsum.photos/seed/${encodeURIComponent(title)}/400/600`);
@@ -118,7 +104,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
         year: finalYear,
         genre: finalGenre.length > 0 ? finalGenre : ['General'],
         rating: finalRating,
-        imdbId: finalImdbId || (movieToEdit ? movieToEdit.imdbId : ''),
+        imdbId: movieToEdit ? movieToEdit.imdbId : '',
         trendingRank: finalRank || null,
         isDirectLink: isDirectLink,
         director: movieToEdit ? movieToEdit.director : undefined,
@@ -235,28 +221,39 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
               </div>
           </div>
 
-          {!autoMode || movieToEdit ? (
-            <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
-                <input
-                    type="text"
-                    value={posterUrl}
-                    onChange={(e) => setPosterUrl(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
-                    placeholder="URL del Poster..."
-                />
-                <div className="grid grid-cols-2 gap-4">
-                    <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Año" />
-                    <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Rating" />
-                </div>
-            </div>
-          ) : (
-             <div className="bg-brand-500/5 p-4 rounded-2xl border border-brand-500/20 flex items-center gap-3">
-                 <Wand2 className="h-5 w-5 text-brand-500 animate-pulse" />
-                 <p className="text-[10px] text-gray-400 uppercase font-black leading-tight tracking-widest">
-                    IA Generativa: Detectaremos póster, año y géneros automáticamente.
-                 </p>
-             </div>
-          )}
+          <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
+              <input
+                  type="text"
+                  value={posterUrl}
+                  onChange={(e) => setPosterUrl(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
+                  placeholder="URL del Poster..."
+              />
+              <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[80px]"
+                  placeholder="Descripción..."
+              />
+              <input
+                  type="text"
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
+                  placeholder="Géneros (separados por coma)..."
+              />
+              <div className="grid grid-cols-2 gap-4">
+                  <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Año" />
+                  <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Rating" />
+              </div>
+              <input
+                  type="number"
+                  value={trendingRank}
+                  onChange={(e) => setTrendingRank(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
+                  placeholder="Posición en Top 10 (Opcional)..."
+              />
+          </div>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3">
@@ -269,7 +266,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
 
           <div className="flex gap-3 pt-4 shrink-0 pb-2">
             <button
-                onClick={handleSmartGenerateAndSave}
+                onClick={handleSave}
                 disabled={!title || !streamUrl || loading || deleteLoading}
                 className="flex-1 py-5 rounded-2xl font-black text-white shadow-xl bg-gradient-to-r from-brand-500 to-red-800 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 uppercase tracking-widest italic text-sm"
             >
