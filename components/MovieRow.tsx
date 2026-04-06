@@ -23,9 +23,9 @@ export const MovieRow: React.FC<MovieRowProps> = ({ title, movies, onMovieClick,
 
   return (
     <div className="mb-4 md:mb-10 relative group/row">
-      <h2 className="text-base sm:text-lg md:text-2xl font-bold text-white mb-2 md:mb-4 px-4 sm:px-6 lg:px-8 flex items-end gap-2 md:gap-3">
+      <h2 className="text-base sm:text-lg md:text-2xl font-bold text-white mb-2 md:mb-4 px-4 sm:px-6 lg:px-8 flex items-end gap-2 md:gap-3 font-display uppercase tracking-widest">
          {title}
-         <span className="text-[10px] sm:text-xs font-semibold text-brand-500 opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer mb-0.5 md:mb-1 flex items-center hover:text-white">
+         <span className="text-[10px] sm:text-xs font-semibold text-gray-400 opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer mb-0.5 md:mb-1 flex items-center hover:text-white uppercase tracking-wider">
             Ver todo <ChevronRight className="h-3 w-3 ml-0.5" />
          </span>
       </h2>

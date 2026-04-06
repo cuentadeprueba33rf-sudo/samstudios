@@ -567,7 +567,7 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#141414] text-white font-sans">
+    <div className="min-h-screen bg-black text-white font-sans">
       <Navbar 
         onAddClick={() => { setSelectedMovie(null); setCurrentView(ViewState.ADD_MOVIE); }}
         onHomeClick={() => { setCurrentView(ViewState.HOME); setSearchTerm(''); }}
@@ -604,7 +604,7 @@ const App = () => {
 
       {currentView === ViewState.MY_LIST ? (
         <div className="pt-24 px-4 sm:px-8 min-h-screen">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Mi Lista</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 font-display">Mi Lista</h2>
             {myListMovies.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {myListMovies.map(movie => (
@@ -622,7 +622,7 @@ const App = () => {
            {/* ADMIN DASHBOARD BANNER */}
            {isAdmin && usingLocalData && !searchTerm && (
              <div className="pt-20 px-4 md:px-8">
-                <div className="bg-blue-900/30 border border-blue-500/30 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-500/30">
                     <div className="flex items-center gap-3">
                         <Database className="h-6 w-6 text-blue-400" />
                         <div>
@@ -633,7 +633,7 @@ const App = () => {
                     <button 
                         onClick={handleSyncCatalog}
                         disabled={syncLoading}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap"
+                        className="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap hover:bg-gray-200 transition-colors"
                     >
                         {syncLoading ? <Loader2 className="animate-spin h-4 w-4" /> : <Database className="h-4 w-4" />}
                         Sincronizar Catálogo
@@ -643,30 +643,30 @@ const App = () => {
            )}
 
            {!searchTerm && (
-             <div className="relative h-[70vh] md:h-[85vh] w-full">
+             <div className="relative h-[85vh] md:h-[90vh] w-full">
                 {(() => {
                     const featured = movies[0]; // HERO (Avatar) or First Fetched
                     if (!featured) return null;
                     return (
                         <>
                             <div className="absolute inset-0">
-                                <img src={featured.posterUrl} className="w-full h-full object-cover" alt={featured.title} />
-                                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
+                                <img src={featured.posterUrl} className="w-full h-full object-cover object-top" alt={featured.title} />
+                                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                             </div>
-                            <div className="absolute bottom-[20%] left-4 md:left-12 max-w-xl space-y-4 animate-fade-in-up">
-                                <h1 className="text-4xl md:text-7xl font-black drop-shadow-2xl">{featured.title}</h1>
-                                <p className="text-base md:text-xl drop-shadow-md line-clamp-3 text-gray-200">{featured.description}</p>
+                            <div className="absolute bottom-[15%] left-4 md:left-12 max-w-2xl space-y-6 animate-fade-in-up">
+                                <h1 className="text-5xl md:text-8xl font-black drop-shadow-2xl font-display tracking-tighter leading-none">{featured.title}</h1>
+                                <p className="text-base md:text-lg drop-shadow-md line-clamp-3 text-gray-300 font-light max-w-xl">{featured.description}</p>
                                 <div className="flex gap-4 pt-4">
                                     <button 
-                                        onClick={() => handleMovieClick(featured)}
-                                        className="bg-white text-black px-6 py-3 rounded-lg flex items-center gap-2 font-bold hover:bg-gray-200 transition-colors shadow-lg"
+                                        onClick={() => window.open(featured.streamUrl, '_blank', 'noopener,noreferrer')}
+                                        className="bg-white text-black px-8 py-4 rounded-full flex items-center gap-3 font-bold hover:scale-105 transition-all shadow-xl uppercase tracking-wider text-sm"
                                     >
                                         <Play className="fill-black h-5 w-5" /> Ver Ahora
                                     </button>
                                     <button 
                                         onClick={() => handleMovieClick(featured)}
-                                        className="bg-gray-500/40 text-white px-6 py-3 rounded-lg flex items-center gap-2 font-bold hover:bg-gray-500/60 transition-colors backdrop-blur-md border border-white/10"
+                                        className="glass-panel text-white px-8 py-4 rounded-full flex items-center gap-3 font-bold hover:bg-white/20 transition-all uppercase tracking-wider text-sm"
                                     >
                                         <Info className="h-5 w-5" /> Más Info
                                     </button>
@@ -678,7 +678,7 @@ const App = () => {
              </div>
            )}
 
-           <div className={`relative z-10 pb-20 ${!searchTerm ? '-mt-24 md:-mt-32' : 'pt-24'}`}>
+           <div className={`relative z-10 pb-20 ${!searchTerm ? '-mt-32' : 'pt-24'}`}>
               
               {!searchTerm && (
                 <>

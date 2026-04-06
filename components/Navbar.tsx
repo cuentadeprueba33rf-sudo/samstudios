@@ -34,19 +34,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-[#050505]/95 backdrop-blur-sm shadow-lg' : 'bg-gradient-to-b from-black/90 to-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'glass-panel shadow-lg' : 'bg-gradient-to-b from-black/90 to-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Left Side: Logo & Menu */}
           <div className={`flex items-center gap-4 md:gap-8 ${mobileSearchActive ? 'hidden sm:flex' : 'flex'}`}>
             <div className="flex items-center cursor-pointer group" onClick={onHomeClick} onDoubleClick={!isAdmin ? onUserClick : undefined}>
-                <span className="text-lg sm:text-2xl md:text-3xl font-black text-[#E50914] tracking-tighter group-hover:scale-105 transition-transform duration-300 drop-shadow-lg">
+                <span className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-widest uppercase font-display group-hover:opacity-80 transition-opacity duration-300 drop-shadow-lg">
                 SAMSTUDIOS
                 </span>
             </div>
             
-            <div className="hidden lg:flex items-center gap-6 text-xs md:text-sm font-medium text-gray-300">
+            <div className="hidden lg:flex items-center gap-6 text-xs md:text-sm font-medium text-gray-400 uppercase tracking-widest">
                 <button onClick={onHomeClick} className="text-white font-bold hover:text-gray-300 transition-colors">Inicio</button>
                 <button className="hover:text-white transition-colors">Series</button>
                 <button className="hover:text-white transition-colors">Películas</button>
@@ -58,14 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Side: Search & Profile */}
           <div className={`flex items-center gap-2 sm:gap-4 ${mobileSearchActive ? 'w-full' : ''}`}>
             
-            <div className={`flex items-center transition-all bg-black/40 border border-white/10 hover:border-white/30 rounded-full px-2 py-1 ${mobileSearchActive ? 'w-full' : ''}`}>
+            <div className={`flex items-center transition-all bg-white/5 border border-white/10 hover:border-white/30 rounded-full px-2 py-1 ${mobileSearchActive ? 'w-full' : ''}`}>
                 <Search 
                     className={`h-4 w-4 md:h-5 md:w-5 text-gray-300 cursor-pointer min-w-[20px]`} 
                     onClick={() => setMobileSearchActive(!mobileSearchActive)} 
                 />
                 <input
                     type="text"
-                    className={`bg-transparent border-none focus:ring-0 text-white text-sm placeholder-gray-400 transition-all duration-300 outline-none ml-2 ${searchTerm || mobileSearchActive ? 'w-full sm:w-64' : 'w-0 sm:focus:w-64 focus:w-32'}`}
+                    className={`bg-transparent border-none focus:ring-0 text-white text-sm placeholder-gray-500 transition-all duration-300 outline-none ml-2 ${searchTerm || mobileSearchActive ? 'w-full sm:w-64' : 'w-0 sm:focus:w-64 focus:w-32'}`}
                     placeholder="Buscar..."
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
@@ -84,17 +84,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {onRequestClick && (
                         <button 
                             onClick={onRequestClick}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-xs md:text-sm font-medium text-gray-200 group"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-xs md:text-sm font-medium text-gray-200 group uppercase tracking-wider"
                             title="Pedir una película o serie"
                         >
-                            <MessageSquarePlus className="h-4 w-4 md:h-5 md:w-5 text-brand-500 group-hover:scale-110 transition-transform" />
+                            <MessageSquarePlus className="h-4 w-4 md:h-5 md:w-5 text-white group-hover:scale-110 transition-transform" />
                             <span className="hidden xs:inline">Pedir</span>
                         </button>
                     )}
 
                     {/* Only show Add button if Admin */}
                     {isAdmin && (
-                      <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                      <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10 uppercase tracking-wider">
                           <Plus className="h-4 w-4" /> 
                           <span className="hidden sm:inline">Add</span>
                       </button>
@@ -103,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {isAdmin && (
                       <div 
                         onClick={onUserClick}
-                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors bg-red-600 hover:bg-red-500 shadow-[0_0_10px_rgba(229,9,20,0.5)]"
+                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors bg-white/10 hover:bg-white/20 border border-white/10"
                       >
                           <LogOut className="h-4 w-4 text-white" />
                       </div>

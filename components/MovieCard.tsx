@@ -40,8 +40,8 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
 
       {/* Rank Number Overlay - Adjusted for small cards */}
       {rank && (
-        <div className="absolute -left-2 -bottom-2 md:-left-6 md:-bottom-4 z-20 h-[50px] w-[30px] md:h-[140px] md:w-[100px] flex items-end justify-end pointer-events-none select-none">
-           <svg width="100%" height="100%" viewBox="0 0 70 100" className="overflow-visible drop-shadow-lg">
+        <div className="absolute -left-4 -bottom-2 md:-left-8 md:-bottom-4 z-20 h-[60px] w-[40px] md:h-[140px] md:w-[100px] flex items-end justify-end pointer-events-none select-none">
+           <svg width="100%" height="100%" viewBox="0 0 70 100" className="overflow-visible drop-shadow-2xl">
              <text 
                x="50" 
                y="95" 
@@ -49,9 +49,9 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
                fontSize="120" 
                fontWeight="900" 
                fill="#000000" 
-               stroke="#4b5563" 
-               strokeWidth="2"
-               style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-5px' }}
+               stroke="#333333" 
+               strokeWidth="3"
+               style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-5px' }}
              >
                {rank}
              </text>
@@ -64,7 +64,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
                fill="none" 
                stroke="#ffffff" 
                strokeWidth="1.5"
-               style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-5px' }}
+               style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-5px' }}
              >
                {rank}
              </text>

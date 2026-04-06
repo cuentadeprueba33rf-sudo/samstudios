@@ -12,11 +12,15 @@
           extend: {
             colors: {
               brand: {
-                900: '#0f172a',
-                800: '#1e293b',
-                500: '#E50914', // Netflix/Studio Red
-                accent: '#ef4444'
+                900: '#0a0a0a',
+                800: '#141414',
+                500: '#ffffff', // White accent for a premium look
+                accent: '#f5f5f5'
               }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              display: ['Montserrat', 'system-ui', 'sans-serif'],
             },
             animation: {
                'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -37,26 +41,33 @@
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Montserrat:wght@300;400;500;700;900&display=swap');
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #050505; /* Deeper black */
-        color: #f8fafc;
+        background-color: #000000; /* Pure black */
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
+      
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Montserrat', sans-serif;
+      }
+
       /* Custom scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #0f172a; 
+        background: #000000; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 4px;
+        background: #333333; 
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
+        background: #555555; 
       }
 
       /* Hide Scrollbar Utility */
@@ -70,13 +81,21 @@
       
       /* Smooth image loading */
       img {
-        transition: opacity 0.3s ease-in-out;
+        transition: opacity 0.5s ease-in-out;
       }
       
       /* Gradient mask for images */
       .mask-image-gradient {
           mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
           -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      }
+      
+      /* Premium glass effect */
+      .glass-panel {
+        background: rgba(25, 25, 25, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
       }
     </style>
 <script type="importmap">
