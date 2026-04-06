@@ -36,6 +36,22 @@
         "created_at": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "character", "movie", "image"]
+    },
+    "Request": {
+      "title": "Request",
+      "description": "A content request from a user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["Película", "Serie"] },
+        "note": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed", "rejected"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "type", "userId", "status", "created_at"]
     }
   },
   "firestore": {
@@ -46,6 +62,10 @@
     "/actors/{actorId}": {
       "schema": { "$ref": "#/entities/Actor" },
       "description": "Actors collection"
+    },
+    "/requests/{requestId}": {
+      "schema": { "$ref": "#/entities/Request" },
+      "description": "User content requests"
     }
   }
 }

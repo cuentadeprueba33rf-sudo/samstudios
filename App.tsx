@@ -585,7 +585,6 @@ const App = () => {
       {currentView === ViewState.REQUEST && (
         <RequestModal 
             onClose={() => setCurrentView(ViewState.HOME)}
-            adminEmail={ADMIN_EMAIL}
         />
       )}
 

@@ -91,5 +91,14 @@ service cloud.firestore {
       allow update: if isAdmin() && isValidActor();
       allow delete: if isAdmin();
     }
+
+    match /requests/{requestId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.status == 'pending';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }

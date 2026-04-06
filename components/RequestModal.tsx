@@ -1,33 +1,60 @@
 import React, { useState } from 'react';
-import { Send, X, MessageSquarePlus, Film, Tv } from 'lucide-react';
+import { Send, X, MessageSquarePlus, Film, Tv, Loader2, CheckCircle2 } from 'lucide-react';
+import { db, auth } from '../services/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface RequestModalProps {
   onClose: () => void;
-  adminEmail?: string;
 }
 
-export const RequestModal: React.FC<RequestModalProps> = ({ onClose, adminEmail = "tu-email@ejemplo.com" }) => {
+export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('Película');
   const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const handleSend = () => {
-    if (!title) return;
+  const handleSend = async () => {
+    if (!title || !auth.currentUser) return;
 
-    const subject = `Nueva Solicitud: ${title}`;
-    const body = `Hola Admin,\n\nMe gustaría solicitar el siguiente contenido para SamStudios:\n\nTitulo: ${title}\nTipo: ${type}\nNota adicional: ${note}\n\n¡Gracias!`;
-    
-    // Create mailto link
-    const mailtoLink = `mailto:${adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
-    
-    // Close modal after a short delay
-    setTimeout(() => {
-        onClose();
-    }, 500);
+    setLoading(true);
+    try {
+        await addDoc(collection(db, 'requests'), {
+            title,
+            type,
+            note,
+            userId: auth.currentUser.uid,
+            userEmail: auth.currentUser.email,
+            status: 'pending',
+            created_at: new Date().toISOString()
+        });
+        
+        setSuccess(true);
+        setTimeout(() => {
+            onClose();
+        }, 2000);
+    } catch (error) {
+        console.error("Error saving request:", error);
+        alert("Hubo un error al enviar tu solicitud. Por favor, intenta de nuevo.");
+    } finally {
+        setLoading(false);
+    }
   };
+
+  if (success) {
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-[#1a1c22] rounded-2xl w-full max-w-md border border-white/10 p-12 flex flex-col items-center text-center animate-fade-in">
+                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="h-10 w-10 text-green-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">¡Solicitud Enviada!</h2>
+                <p className="text-gray-400">El administrador revisará tu petición pronto.</p>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
@@ -94,17 +121,17 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, adminEmail 
 
             <button 
                 onClick={handleSend}
-                disabled={!title}
+                disabled={!title || loading}
                 className={`w-full py-3.5 rounded-lg font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all mt-2
-                    ${title ? 'bg-white text-black hover:bg-gray-200 hover:scale-[1.02]' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+                    ${title && !loading ? 'bg-white text-black hover:bg-gray-200 hover:scale-[1.02]' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
                 `}
             >
-                <Send className="h-4 w-4" />
-                Enviar Solicitud
+                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-4 w-4" />}
+                {loading ? 'Enviando...' : 'Enviar Solicitud'}
             </button>
             
             <p className="text-[10px] text-center text-gray-500">
-                Se abrirá tu aplicación de correo predeterminada.
+                Tu solicitud será enviada directamente al panel del administrador.
             </p>
         </div>
       </div>

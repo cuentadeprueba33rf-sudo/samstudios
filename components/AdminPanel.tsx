@@ -11,11 +11,27 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Search,
-  Trash2
+  Trash2,
+  MessageSquarePlus,
+  Clock,
+  CheckCircle,
+  XCircle,
+  User
 } from 'lucide-react';
 import { Movie } from '../types';
 import { db } from '../services/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, updateDoc } from 'firebase/firestore';
+
+interface Request {
+    id: string;
+    title: string;
+    type: string;
+    note: string;
+    userEmail: string;
+    userId: string;
+    status: 'pending' | 'completed' | 'rejected';
+    created_at: string;
+}
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -26,8 +42,11 @@ interface AdminPanelProps {
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, onSyncComplete }) => {
   const [syncLoading, setSyncLoading] = useState(false);
   const [dbMovies, setDbMovies] = useState<Movie[]>([]);
+  const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'requests'>('catalog');
 
   const fetchDbMovies = async () => {
     setLoading(true);
@@ -43,8 +62,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
     }
   };
 
+  const fetchRequests = async () => {
+    setRequestsLoading(true);
+    try {
+      const q = query(collection(db, 'requests'), orderBy('created_at', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+      } as Request));
+      setRequests(data);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDbMovies();
+    fetchRequests();
   }, []);
 
   const handleSync = async () => {
@@ -101,6 +138,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
     }
   };
 
+  const handleUpdateRequestStatus = async (requestId: string, newStatus: 'completed' | 'rejected') => {
+      try {
+          await updateDoc(doc(db, 'requests', requestId), {
+              status: newStatus
+          });
+          setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
+      } catch (error) {
+          console.error("Error updating request:", error);
+          alert("Error al actualizar la solicitud.");
+      }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+      if (!confirm("¿Eliminar esta solicitud definitivamente?")) return;
+      try {
+          await deleteDoc(doc(db, 'requests', requestId));
+          setRequests(prev => prev.filter(r => r.id !== requestId));
+      } catch (error) {
+          console.error("Error deleting request:", error);
+      }
+  };
+
   const filteredMovies = dbMovies.filter(m => 
     m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     m.genre.some(g => g.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -125,7 +184,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Panel de Administración</h1>
-                <p className="text-gray-400 text-sm">Gestiona el catálogo y sincroniza datos</p>
+                <p className="text-gray-400 text-sm">Gestiona el catálogo y solicitudes de usuarios</p>
               </div>
             </div>
           </div>
@@ -164,11 +223,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
 
           <div className="glass-panel p-6 rounded-2xl border border-white/5">
             <div className="flex items-center justify-between mb-4">
-              <Database className="h-8 w-8 text-green-400" />
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Total DB</span>
+              <MessageSquarePlus className="h-8 w-8 text-yellow-400" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Solicitudes</span>
             </div>
-            <div className="text-3xl font-black">{dbMovies.length}</div>
-            <p className="text-xs text-gray-500 mt-1">Registros totales</p>
+            <div className="text-3xl font-black">{requests.filter(r => r.status === 'pending').length}</div>
+            <p className="text-xs text-gray-500 mt-1">Pendientes por revisar</p>
           </div>
 
           <div className="glass-panel p-6 rounded-2xl border border-white/5">
@@ -184,86 +243,191 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
           </div>
         </div>
 
-        {/* Catalog Management */}
-        <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden">
-          <div className="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Database className="h-5 w-5 text-brand-500" />
-              Gestión de Catálogo (DB)
-            </h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input 
-                type="text" 
-                placeholder="Buscar en DB..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:border-brand-500 transition-colors w-full md:w-64"
-              />
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-white/5 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  <th className="px-6 py-4">Título</th>
-                  <th className="px-6 py-4">Año</th>
-                  <th className="px-6 py-4">Género</th>
-                  <th className="px-6 py-4">Rating</th>
-                  <th className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-500" />
-                      <p className="text-gray-500 mt-2">Cargando catálogo...</p>
-                    </td>
-                  </tr>
-                ) : filteredMovies.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                      No se encontraron resultados en la base de datos.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredMovies.map(movie => (
-                    <tr key={movie.id} className="hover:bg-white/5 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <img src={movie.posterUrl} alt="" className="h-10 w-7 object-cover rounded shadow-lg" />
-                          <span className="font-bold">{movie.title}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-400">{movie.year}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {movie.genre.slice(0, 2).map(g => (
-                            <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/10 rounded text-gray-300">{g}</span>
-                          ))}
-                          {movie.genre.length > 2 && <span className="text-[10px] text-gray-500">+{movie.genre.length - 2}</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-yellow-500 font-bold">★ {movie.rating}</span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleDelete(movie.id, movie.title)}
-                          className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+        {/* Tabs */}
+        <div className="flex border-b border-white/10">
+            <button 
+                onClick={() => setActiveTab('catalog')}
+                className={`px-8 py-4 font-bold text-sm uppercase tracking-widest transition-all relative ${activeTab === 'catalog' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+                Catálogo
+                {activeTab === 'catalog' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-500" />}
+            </button>
+            <button 
+                onClick={() => setActiveTab('requests')}
+                className={`px-8 py-4 font-bold text-sm uppercase tracking-widest transition-all relative ${activeTab === 'requests' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+                Solicitudes
+                {requests.filter(r => r.status === 'pending').length > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-brand-500 text-white text-[10px] rounded-full">
+                        {requests.filter(r => r.status === 'pending').length}
+                    </span>
                 )}
-              </tbody>
-            </table>
-          </div>
+                {activeTab === 'requests' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-500" />}
+            </button>
         </div>
+
+        {activeTab === 'catalog' ? (
+            <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden">
+                <div className="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                        <Database className="h-5 w-5 text-brand-500" />
+                        Gestión de Catálogo (DB)
+                    </h2>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar en DB..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:border-brand-500 transition-colors w-full md:w-64"
+                        />
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-white/5 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                <th className="px-6 py-4">Título</th>
+                                <th className="px-6 py-4">Año</th>
+                                <th className="px-6 py-4">Género</th>
+                                <th className="px-6 py-4">Rating</th>
+                                <th className="px-6 py-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-500" />
+                                        <p className="text-gray-500 mt-2">Cargando catálogo...</p>
+                                    </td>
+                                </tr>
+                            ) : filteredMovies.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                        No se encontraron resultados en la base de datos.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredMovies.map(movie => (
+                                    <tr key={movie.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <img src={movie.posterUrl} alt="" className="h-10 w-7 object-cover rounded shadow-lg" />
+                                                <span className="font-bold">{movie.title}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-400">{movie.year}</td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {movie.genre.slice(0, 2).map(g => (
+                                                    <span key={g} className="text-[10px] px-1.5 py-0.5 bg-white/10 rounded text-gray-300">{g}</span>
+                                                ))}
+                                                {movie.genre.length > 2 && <span className="text-[10px] text-gray-500">+{movie.genre.length - 2}</span>}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-yellow-500 font-bold">★ {movie.rating}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button 
+                                                onClick={() => handleDelete(movie.id, movie.title)}
+                                                className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        ) : (
+            <div className="space-y-4">
+                {requestsLoading ? (
+                    <div className="glass-panel p-12 rounded-3xl border border-white/5 text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-500" />
+                        <p className="text-gray-500 mt-2">Cargando solicitudes...</p>
+                    </div>
+                ) : requests.length === 0 ? (
+                    <div className="glass-panel p-12 rounded-3xl border border-white/5 text-center text-gray-500">
+                        No hay solicitudes pendientes.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {requests.map(req => (
+                            <div key={req.id} className={`glass-panel p-6 rounded-2xl border transition-all ${req.status === 'pending' ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}`}>
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${req.type === 'Película' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                                            {req.type === 'Película' ? <Film className="h-5 w-5" /> : <Tv className="h-5 w-5" />}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">{req.title}</h3>
+                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                <Clock className="h-3 w-3" />
+                                                {new Date(req.created_at).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                        req.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
+                                        req.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                                        'bg-red-500/20 text-red-500'
+                                    }`}>
+                                        {req.status === 'pending' ? 'Pendiente' : req.status === 'completed' ? 'Completada' : 'Rechazada'}
+                                    </div>
+                                </div>
+
+                                {req.note && (
+                                    <p className="text-sm text-gray-400 mb-4 bg-black/20 p-3 rounded-lg border border-white/5 italic">
+                                        "{req.note}"
+                                    </p>
+                                )}
+
+                                <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <User className="h-3 w-3" />
+                                        {req.userEmail}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {req.status === 'pending' && (
+                                            <>
+                                                <button 
+                                                    onClick={() => handleUpdateRequestStatus(req.id, 'completed')}
+                                                    className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors"
+                                                    title="Marcar como completada"
+                                                >
+                                                    <CheckCircle className="h-5 w-5" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleUpdateRequestStatus(req.id, 'rejected')}
+                                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    title="Rechazar solicitud"
+                                                >
+                                                    <XCircle className="h-5 w-5" />
+                                                </button>
+                                            </>
+                                        )}
+                                        <button 
+                                            onClick={() => handleDeleteRequest(req.id)}
+                                            className="p-2 text-gray-500 hover:text-white rounded-lg transition-colors"
+                                            title="Eliminar registro"
+                                        >
+                                            <Trash2 className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        )}
 
       </div>
     </div>
