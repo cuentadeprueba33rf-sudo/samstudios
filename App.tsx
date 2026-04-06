@@ -656,6 +656,11 @@ const App = () => {
                             </div>
                             <div className="absolute bottom-[15%] left-4 md:left-12 max-w-2xl space-y-6 animate-fade-in-up">
                                 <h1 className="text-5xl md:text-8xl font-black drop-shadow-2xl font-display tracking-tighter leading-none">{featured.title}</h1>
+                                {featured.snippet && (
+                                    <p className="text-xl md:text-2xl font-medium text-white italic drop-shadow-md">
+                                        "{featured.snippet}"
+                                    </p>
+                                )}
                                 <p className="text-base md:text-lg drop-shadow-md line-clamp-3 text-gray-300 font-light max-w-xl">{featured.description}</p>
                                 <div className="flex gap-4 pt-4">
                                     <button 

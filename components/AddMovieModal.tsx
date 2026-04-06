@@ -19,6 +19,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
   const [isDirectLink, setIsDirectLink] = useState(false);
   
   const [description, setDescription] = useState('');
+  const [snippet, setSnippet] = useState('');
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [genre, setGenre] = useState('');
   const [rating, setRating] = useState('');
@@ -38,6 +39,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
         setTrendingRank(movieToEdit.trendingRank ? movieToEdit.trendingRank.toString() : '');
         setIsDirectLink(!!movieToEdit.isDirectLink);
         setDescription(movieToEdit.description);
+        setSnippet(movieToEdit.snippet || '');
         setYear(movieToEdit.year);
         setGenre(movieToEdit.genre.join(', '));
         setRating(movieToEdit.rating.toString());
@@ -101,6 +103,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
         streamUrl: finalStreamUrl,
         posterUrl: finalPosterUrl,
         description: finalDescription || 'Sin descripción.',
+        snippet: snippet || '',
         year: finalYear,
         genre: finalGenre.length > 0 ? finalGenre : ['General'],
         rating: finalRating,
@@ -115,6 +118,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
       if (movieToSave.director === undefined) delete movieToSave.director;
       if (movieToSave.actors === undefined) delete movieToSave.actors;
       if (movieToSave.imdbId === undefined || movieToSave.imdbId === '') delete movieToSave.imdbId;
+      if (movieToSave.snippet === '') delete movieToSave.snippet;
 
       setStatus('Escribiendo en Firebase...');
 
@@ -222,37 +226,69 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
           </div>
 
           <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
-              <input
-                  type="text"
-                  value={posterUrl}
-                  onChange={(e) => setPosterUrl(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
-                  placeholder="URL del Poster..."
-              />
-              <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[80px]"
-                  placeholder="Descripción..."
-              />
-              <input
-                  type="text"
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
-                  placeholder="Géneros (separados por coma)..."
-              />
-              <div className="grid grid-cols-2 gap-4">
-                  <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Año" />
-                  <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Rating" />
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">URL del Póster</label>
+                <input
+                    type="text"
+                    value={posterUrl}
+                    onChange={(e) => setPosterUrl(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    placeholder="https://..."
+                />
               </div>
-              <input
-                  type="number"
-                  value={trendingRank}
-                  onChange={(e) => setTrendingRank(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
-                  placeholder="Posición en Top 10 (Opcional)..."
-              />
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Sinopsis (Descripción Completa)</label>
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[100px] focus:border-brand-500 transition-colors"
+                    placeholder="Escribe la sinopsis detallada aquí..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Fragmento / Resumen Corto (Opcional)</label>
+                <textarea
+                    value={snippet}
+                    onChange={(e) => setSnippet(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[60px] focus:border-brand-500 transition-colors"
+                    placeholder="Un breve resumen de 1 o 2 líneas..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Géneros</label>
+                <input
+                    type="text"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    placeholder="Acción, Comedia, Drama..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Año</label>
+                    <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand-500 transition-colors" placeholder="Ej: 2024" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Calificación</label>
+                    <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand-500 transition-colors" placeholder="Ej: 8.5" />
+                  </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Posición en el Ranking (Top 10)</label>
+                <input
+                    type="number"
+                    value={trendingRank}
+                    onChange={(e) => setTrendingRank(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    placeholder="Ej: 1 (Opcional)"
+                />
+              </div>
           </div>
 
           {error && (

@@ -80,6 +80,11 @@ export const Player: React.FC<PlayerProps> = ({
                         <span className="text-gray-300">{movie.genre.join(', ')}</span>
                     </div>
 
+                    {movie.snippet && (
+                        <p className="text-xl md:text-2xl font-medium text-white italic max-w-2xl">
+                            "{movie.snippet}"
+                        </p>
+                    )}
                     <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl font-light">
                         {movie.description || "Sin descripción disponible."}
                     </p>
