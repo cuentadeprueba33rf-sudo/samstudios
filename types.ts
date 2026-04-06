@@ -40,5 +40,6 @@ export enum ViewState {
   EDIT_MOVIE = 'EDIT_MOVIE',
   MY_LIST = 'MY_LIST',
   LOGIN = 'LOGIN',
-  REQUEST = 'REQUEST'
+  REQUEST = 'REQUEST',
+  ADMIN = 'ADMIN'
 }

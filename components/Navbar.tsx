@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Bell, User, LogOut, MessageSquarePlus, ShieldCheck } from 'lucide-react';
+import { Plus, Search, Bell, User, LogOut, MessageSquarePlus, ShieldCheck, LayoutDashboard } from 'lucide-react';
 
 interface NavbarProps {
   onAddClick: () => void;
   onHomeClick: () => void;
   onMyListClick: () => void;
   onUserClick: () => void;
+  onAdminClick?: () => void;
   onRequestClick?: () => void;
   searchTerm: string;
   onSearchChange: (val: string) => void;
@@ -17,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onHomeClick, 
   onMyListClick, 
   onUserClick,
+  onAdminClick,
   onRequestClick,
   searchTerm, 
   onSearchChange,
@@ -102,10 +104,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     {/* Only show Add button if Admin */}
                     {isAdmin && (
-                      <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10 uppercase tracking-wider">
-                          <Plus className="h-4 w-4" /> 
-                          <span className="hidden sm:inline">Add</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={onAdminClick} 
+                          className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-brand-500/20 px-3 py-1.5 rounded-full border border-brand-500/30 uppercase tracking-wider"
+                          title="Panel de Administración"
+                        >
+                            <LayoutDashboard className="h-4 w-4" /> 
+                            <span className="hidden sm:inline">Admin</span>
+                        </button>
+                        <button onClick={onAddClick} className="text-gray-200 hover:text-white font-medium text-xs md:text-sm flex items-center gap-1 transition-colors bg-white/10 px-3 py-1.5 rounded-full border border-white/10 uppercase tracking-wider">
+                            <Plus className="h-4 w-4" /> 
+                            <span className="hidden sm:inline">Add</span>
+                        </button>
+                      </div>
                     )}
                     
                     {isAdmin && (

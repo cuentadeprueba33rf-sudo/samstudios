@@ -11,8 +11,9 @@ import { LoginModal } from './components/LoginModal';
 import { RequestModal } from './components/RequestModal'; 
 import { ConstructionNotification } from './components/ConstructionNotification';
 import { SamIAProtect } from './components/SamIAProtect';
+import { AdminPanel } from './components/AdminPanel';
 import { Movie, ViewState } from './types';
-import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3 } from 'lucide-react';
+import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3, LayoutDashboard } from 'lucide-react';
 import { db, auth } from './services/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -396,7 +397,6 @@ const App = () => {
   // State for Movies
   const [movies, setMovies] = useState<Movie[]>(INITIAL_MOVIES);
   const [usingLocalData, setUsingLocalData] = useState(true); // Track if we are using hardcoded data
-  const [syncLoading, setSyncLoading] = useState(false);
   
   const [myList, setMyList] = useState<string[]>([]);
   const [likedMovies, setLikedMovies] = useState<string[]>([]);
@@ -439,43 +439,6 @@ const App = () => {
   useEffect(() => {
     fetchMovies();
   }, []);
-
-  const handleSyncCatalog = async () => {
-      if (!confirm("Esto subirá todas las películas 'base' a tu base de datos Supabase. ¿Continuar?")) return;
-      
-      setSyncLoading(true);
-      try {
-          const moviesToUpload = INITIAL_MOVIES.map(m => {
-              const movieObj: any = {
-                  ...m,
-                  genre: m.genre || [],
-                  actors: m.actors || []
-              };
-              
-              // Remove undefined fields
-              Object.keys(movieObj).forEach(key => {
-                  if (movieObj[key] === undefined) {
-                      delete movieObj[key];
-                  }
-              });
-              
-              return movieObj;
-          });
-
-          for (const movie of moviesToUpload) {
-             const movieRef = doc(db, 'movies', movie.id);
-             await setDoc(movieRef, { ...movie, created_at: new Date().toISOString() }, { merge: true });
-          }
-          
-          alert("¡Catálogo sincronizado con éxito! Ahora tus cambios serán permanentes.");
-          fetchMovies(); 
-
-      } catch (e: any) {
-          alert("Error sincronizando: " + e.message);
-      } finally {
-          setSyncLoading(false);
-      }
-  };
 
   const filteredMovies = useMemo(() => {
     if (!searchTerm) return movies;
@@ -589,11 +552,28 @@ const App = () => {
         onHomeClick={() => { setCurrentView(ViewState.HOME); setSearchTerm(''); }}
         onMyListClick={() => setCurrentView(ViewState.MY_LIST)}
         onUserClick={() => isAdmin ? handleLogout() : setCurrentView(ViewState.LOGIN)}
+        onAdminClick={() => isAdmin && setCurrentView(ViewState.ADMIN)}
         onRequestClick={() => setCurrentView(ViewState.REQUEST)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         isAdmin={isAdmin}
       />
+
+      {currentView === ViewState.ADMIN && isAdmin && (
+        <AdminPanel 
+          onBack={() => setCurrentView(ViewState.HOME)} 
+          initialMovies={INITIAL_MOVIES}
+          onSyncComplete={fetchMovies}
+        />
+      )}
+
+      {currentView === ViewState.ADMIN && isAdmin && (
+        <AdminPanel 
+          onBack={() => setCurrentView(ViewState.HOME)} 
+          initialMovies={INITIAL_MOVIES}
+          onSyncComplete={fetchMovies}
+        />
+      )}
 
       {currentView === ViewState.LOGIN && (
         <LoginModal 
@@ -618,7 +598,7 @@ const App = () => {
         />
       )}
 
-      {currentView === ViewState.MY_LIST ? (
+      {currentView === ViewState.MY_LIST && (
         <div className="pt-24 px-4 sm:px-8 min-h-screen">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 font-display">Mi Lista</h2>
             {myListMovies.length > 0 ? (
@@ -633,31 +613,11 @@ const App = () => {
                 </div>
             )}
         </div>
-      ) : (
+      )}
+
+      {currentView === ViewState.HOME && (
         <>
            <ConstructionNotification onRequestClick={() => setCurrentView(ViewState.REQUEST)} />
-           {/* ADMIN DASHBOARD BANNER */}
-           {isAdmin && usingLocalData && !searchTerm && (
-             <div className="pt-20 px-4 md:px-8">
-                <div className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-500/30">
-                    <div className="flex items-center gap-3">
-                        <Database className="h-6 w-6 text-blue-400" />
-                        <div>
-                            <h3 className="font-bold text-white">Modo Mixto Detectado</h3>
-                            <p className="text-sm text-gray-400">Las películas base están en el código. Si las borras, volverán. Sincroniza para moverlas a la base de datos.</p>
-                        </div>
-                    </div>
-                    <button 
-                        onClick={handleSyncCatalog}
-                        disabled={syncLoading}
-                        className="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap hover:bg-gray-200 transition-colors"
-                    >
-                        {syncLoading ? <Loader2 className="animate-spin h-4 w-4" /> : <Database className="h-4 w-4" />}
-                        Sincronizar Catálogo
-                    </button>
-                </div>
-             </div>
-           )}
 
            {!searchTerm && (
              <div className="relative h-[85vh] md:h-[90vh] w-full">
