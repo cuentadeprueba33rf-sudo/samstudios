@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ServerOff, Globe, CheckCircle } from 'lucide-react';
+import { ShieldCheck, ServerOff, Globe, CheckCircle, MessageSquarePlus } from 'lucide-react';
 
 interface DisclaimerModalProps {
   onAccept: () => void;
@@ -62,6 +62,19 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ onAccept }) =>
                 <h3 className="text-white font-bold text-sm md:text-base">Tu Seguridad es Primero</h3>
                 <p className="text-gray-400 text-xs md:text-sm mt-1 leading-relaxed">
                   Nuestro objetivo es evitar que navegues por sitios inseguros llenos de spam o virus. Filtramos lo mejor para ti.
+                </p>
+              </div>
+            </div>
+
+            {/* Point 4: Requests */}
+            <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+              <div className="bg-gray-800 p-2 md:p-2.5 rounded-lg shrink-0">
+                <MessageSquarePlus className="h-5 w-5 md:h-6 md:w-6 text-brand-500" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm md:text-base">Tú Eliges el Contenido</h3>
+                <p className="text-gray-400 text-xs md:text-sm mt-1 leading-relaxed">
+                  ¿No encuentras tu película favorita? ¡Solicítala! Estamos construyendo el catálogo basándonos en lo que tú quieres ver.
                 </p>
               </div>
             </div>

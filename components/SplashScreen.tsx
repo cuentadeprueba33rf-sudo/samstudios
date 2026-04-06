@@ -34,6 +34,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         {/* Sombra/Glow sutil detrás para dar profundidad */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E50914]/10 to-transparent opacity-0 animate-glow-pulse pointer-events-none" />
 
+        {/* Mensaje de bienvenida sutil */}
+        <div className="absolute bottom-10 text-white/40 text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase animate-fade-in-delayed">
+            ¿No encuentras tu película? Solicítala al entrar
+        </div>
+
       </div>
 
       <style>{`
@@ -62,6 +67,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             }
         }
 
+        @keyframes fade-in-delayed {
+            0%, 40% { opacity: 0; transform: translateY(10px); }
+            60% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         /* El contenedor hace fade-out al final para suavizar la transición a la app */
         @keyframes intro-sequence {
             0% { background-color: black; }
@@ -86,6 +98,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
         .animate-glow-pulse {
             animation: glow-pulse 3.5s ease-in-out forwards;
+        }
+
+        .animate-fade-in-delayed {
+            animation: fade-in-delayed 3.5s ease-out forwards;
         }
       `}</style>
     </div>

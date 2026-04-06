@@ -620,7 +620,7 @@ const App = () => {
         </div>
       ) : (
         <>
-           <ConstructionNotification />
+           <ConstructionNotification onRequestClick={() => setCurrentView(ViewState.REQUEST)} />
            {/* ADMIN DASHBOARD BANNER */}
            {isAdmin && usingLocalData && !searchTerm && (
              <div className="pt-20 px-4 md:px-8">
