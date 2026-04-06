@@ -10,6 +10,7 @@ import { DisclaimerModal } from './components/DisclaimerModal';
 import { LoginModal } from './components/LoginModal';
 import { RequestModal } from './components/RequestModal'; 
 import { ConstructionNotification } from './components/ConstructionNotification';
+import { SamIAProtect } from './components/SamIAProtect';
 import { Movie, ViewState } from './types';
 import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3 } from 'lucide-react';
 import { db, auth } from './services/firebase';
@@ -382,6 +383,13 @@ const App = () => {
     return false;
   });
 
+  const [protectAccepted, setProtectAccepted] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return sessionStorage.getItem('samstudios_protect_v1') === 'true';
+    }
+    return false;
+  });
+
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   
@@ -548,6 +556,13 @@ const App = () => {
 
   if (!disclaimerAccepted) {
     return <DisclaimerModal onAccept={handleAcceptDisclaimer} />;
+  }
+
+  if (!protectAccepted) {
+    return <SamIAProtect onClose={() => {
+        sessionStorage.setItem('samstudios_protect_v1', 'true');
+        setProtectAccepted(true);
+    }} />;
   }
 
   if (currentView === ViewState.PLAYER && selectedMovie) {

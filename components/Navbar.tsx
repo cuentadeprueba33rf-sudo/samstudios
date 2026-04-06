@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Bell, User, LogOut, MessageSquarePlus } from 'lucide-react';
+import { Plus, Search, Bell, User, LogOut, MessageSquarePlus, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
   onAddClick: () => void;
@@ -58,6 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Side: Search & Profile */}
           <div className={`flex items-center gap-2 sm:gap-4 ${mobileSearchActive ? 'w-full' : ''}`}>
             
+            {/* SAM IA PROTECT BADGE */}
+            {!mobileSearchActive && (
+                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-[10px] font-black text-brand-400 uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    SAM IA PROTECT
+                </div>
+            )}
+
             <div className={`flex items-center transition-all bg-white/5 border border-white/10 hover:border-white/30 rounded-full px-2 py-1 ${mobileSearchActive ? 'w-full' : ''}`}>
                 <Search 
                     className={`h-4 w-4 md:h-5 md:w-5 text-gray-300 cursor-pointer min-w-[20px]`} 
