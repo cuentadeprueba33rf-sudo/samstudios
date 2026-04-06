@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Left Side: Logo & Menu */}
           <div className={`flex items-center gap-4 md:gap-8 ${mobileSearchActive ? 'hidden sm:flex' : 'flex'}`}>
-            <div className="flex items-center cursor-pointer group" onClick={onHomeClick}>
+            <div className="flex items-center cursor-pointer group" onClick={onHomeClick} onDoubleClick={!isAdmin ? onUserClick : undefined}>
                 <span className="text-lg sm:text-2xl md:text-3xl font-black text-[#E50914] tracking-tighter group-hover:scale-105 transition-transform duration-300 drop-shadow-lg">
                 SAMSTUDIOS
                 </span>
@@ -100,12 +100,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     )}
                     
-                    <div 
-                      onClick={onUserClick}
-                      className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${isAdmin ? 'bg-red-600 hover:bg-red-500 shadow-[0_0_10px_rgba(229,9,20,0.5)]' : 'bg-gray-800 hover:bg-gray-700 border border-white/10'}`}
-                    >
-                        {isAdmin ? <LogOut className="h-4 w-4 text-white" /> : <User className="h-4 w-4 text-white" />}
-                    </div>
+                    {isAdmin && (
+                      <div 
+                        onClick={onUserClick}
+                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors bg-red-600 hover:bg-red-500 shadow-[0_0_10px_rgba(229,9,20,0.5)]"
+                      >
+                          <LogOut className="h-4 w-4 text-white" />
+                      </div>
+                    )}
                 </>
             )}
           </div>

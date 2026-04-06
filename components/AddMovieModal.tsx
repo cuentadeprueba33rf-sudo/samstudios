@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Wand2, Loader2, Link as LinkIcon, Image as ImageIcon, Trophy, Save, Trash2, AlertTriangle, FileText, Calendar, Star, Clapperboard } from 'lucide-react';
+import { X, Wand2, Loader2, Link as LinkIcon, Image as ImageIcon, Trophy, Save, Trash2, AlertTriangle, FileText, Calendar, Star, Clapperboard, MonitorPlay, Zap } from 'lucide-react';
 import { generateMovieMetadata } from '../services/geminiService';
-import { supabase } from '../services/supabaseClient';
+import { db } from '../services/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { Movie } from '../types';
 
 interface AddMovieModalProps {
@@ -16,41 +17,71 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
   const [streamUrl, setStreamUrl] = useState('');
   const [posterUrl, setPosterUrl] = useState('');
   const [trendingRank, setTrendingRank] = useState<string>('');
+  const [isDirectLink, setIsDirectLink] = useState(false);
   
-  // New Manual Fields
   const [description, setDescription] = useState('');
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [genre, setGenre] = useState('');
   const [rating, setRating] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [resolving, setResolving] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState('');
   const [autoMode, setAutoMode] = useState(true);
   const [status, setStatus] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Pre-fill data if editing
   useEffect(() => {
     if (movieToEdit) {
         setTitle(movieToEdit.title);
         setStreamUrl(movieToEdit.streamUrl);
         setPosterUrl(movieToEdit.posterUrl);
         setTrendingRank(movieToEdit.trendingRank ? movieToEdit.trendingRank.toString() : '');
-        
-        // Fill manual fields
+        setIsDirectLink(!!movieToEdit.isDirectLink);
         setDescription(movieToEdit.description);
         setYear(movieToEdit.year);
         setGenre(movieToEdit.genre.join(', '));
         setRating(movieToEdit.rating.toString());
-
-        setAutoMode(false); // Manual mode by default when editing
+        setAutoMode(false);
     }
   }, [movieToEdit]);
 
+  // Función para optimizar links de TeraBox
+  const resolveLink = () => {
+    if (!streamUrl) return;
+    setResolving(true);
+    setStatus("Analizando origen de datos...");
+    
+    // Regex para capturar el ID de cualquier variante de TeraBox
+    const teraBoxRegex = /(?:terabox\.com|1024terabox\.com|teraboxapp\.com|terabox\.app)\/s\/([a-zA-Z0-9_-]+)/;
+    const match = streamUrl.match(teraBoxRegex);
+    
+    setTimeout(() => {
+        if (match && match[1]) {
+            const id = match[1];
+            // Usamos un formato de Embed estable. TeraBox no permite MP4 directo sin API de pago.
+            // Por lo tanto, lo configuramos como Embed (isDirectLink = false)
+            const resolved = `https://www.terabox.app/sharing/embed?surl=${id}`;
+            setStreamUrl(resolved);
+            setIsDirectLink(false); // IMPORTANTE: Debe ser false para que cargue en Iframe
+            setStatus("Link optimizado para Modo Embed (Sin Bloqueos)");
+        } else {
+            // Si es un archivo real .mp4
+            if (streamUrl.toLowerCase().match(/\.(mp4|mkv|webm|m3u8)$/)) {
+                setIsDirectLink(true);
+                setStatus("Archivo de Video Directo Detectado");
+            } else {
+                setStatus("Link procesado como página externa.");
+            }
+        }
+        setResolving(false);
+    }, 1000);
+  };
+
   const handleSmartGenerateAndSave = async () => {
     if (!title) {
-        setError("Por favor escribe el título de la película.");
+        setError("Por favor escribe el título.");
         return;
     }
     setLoading(true);
@@ -61,82 +92,53 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
       let finalYear = year;
       let finalGenre: string[] = genre.split(',').map(g => g.trim()).filter(g => g);
       let finalRating = parseFloat(rating) || 0;
-      let finalDirector = '';
-      let finalActors: string[] = [];
       let finalImdbId = '';
 
-      // 1. Logic for Auto Mode (Generate Data)
       if (autoMode && !movieToEdit) {
-          setStatus('Generando metadatos con IA...');
+          setStatus('Sincronizando con IA...');
           const metadata = await generateMovieMetadata(title);
-          
           finalDescription = metadata.description;
           finalYear = metadata.year;
           finalGenre = metadata.genre;
           finalRating = metadata.rating;
           finalImdbId = metadata.imdbId || '';
-          
-          if (!posterUrl) {
-             // Fallback if no poster provided in auto mode
-             // In a real app, you might fetch this from an API too
-          }
       } 
 
-      // 2. Prepare Final Object
-      const finalStreamUrl = streamUrl || (movieToEdit ? movieToEdit.streamUrl : 'https://google.com'); // Placeholder if empty
+      const finalStreamUrl = streamUrl || (movieToEdit ? movieToEdit.streamUrl : '');
       const finalPosterUrl = posterUrl || (movieToEdit ? movieToEdit.posterUrl : `https://picsum.photos/seed/${encodeURIComponent(title)}/400/600`);
       const finalRank = trendingRank ? parseInt(trendingRank) : null;
       const finalId = movieToEdit ? movieToEdit.id : crypto.randomUUID();
-
-      // Ensure manual fields are respected if not auto
-      if (!autoMode) {
-          if (!description) finalDescription = 'Sin descripción disponible.';
-          if (finalGenre.length === 0) finalGenre = ['General'];
-      }
 
       const movieToSave: Movie = {
         id: finalId,
         title: title,
         streamUrl: finalStreamUrl,
         posterUrl: finalPosterUrl,
-        description: finalDescription,
+        description: finalDescription || 'Sin descripción.',
         year: finalYear,
-        genre: finalGenre,
+        genre: finalGenre.length > 0 ? finalGenre : ['General'],
         rating: finalRating,
-        director: finalDirector, // You could add inputs for these too if needed
-        actors: finalActors,
-        imdbId: finalImdbId,
-        trendingRank: finalRank || undefined
+        imdbId: finalImdbId || (movieToEdit ? movieToEdit.imdbId : ''),
+        trendingRank: finalRank || null,
+        isDirectLink: isDirectLink,
+        director: movieToEdit ? movieToEdit.director : undefined,
+        actors: movieToEdit ? movieToEdit.actors : undefined
       };
 
-      setStatus('Guardando en Supabase...');
+      // Remove undefined fields so Firestore doesn't complain
+      if (movieToSave.director === undefined) delete movieToSave.director;
+      if (movieToSave.actors === undefined) delete movieToSave.actors;
+      if (movieToSave.imdbId === undefined || movieToSave.imdbId === '') delete movieToSave.imdbId;
 
-      const { error: dbError } = await supabase
-        .from('movies')
-        .upsert({
-            id: movieToSave.id,
-            title: movieToSave.title,
-            description: movieToSave.description,
-            year: movieToSave.year,
-            genre: movieToSave.genre,
-            "posterUrl": movieToSave.posterUrl,
-            "streamUrl": movieToSave.streamUrl,
-            rating: movieToSave.rating,
-            director: movieToSave.director,
-            actors: movieToSave.actors,
-            "imdbId": movieToSave.imdbId,
-            "trendingRank": movieToSave.trendingRank
-        })
-        .select();
+      setStatus('Escribiendo en Firebase...');
 
-      if (dbError) {
-        throw new Error(dbError.message);
-      }
+      const movieRef = doc(db, 'movies', movieToSave.id);
+      await setDoc(movieRef, { ...movieToSave, created_at: new Date().toISOString() }, { merge: true });
 
       onAdd(movieToSave);
       onClose();
     } catch (e: any) {
-      setError(e.message || "Error desconocido.");
+      setError(e.message || "Error al guardar.");
     } finally {
       setLoading(false);
       setStatus('');
@@ -150,198 +152,137 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
           await onDelete(movieToEdit.id);
           onClose();
       } catch (e: any) {
-          setError("Error al eliminar: " + e.message);
+          setError("Error al borrar: " + e.message);
           setDeleteLoading(false);
       }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative bg-[#1a1c22] rounded-2xl w-full max-w-lg border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
-        <div className="p-5 border-b border-white/10 flex justify-between items-center shrink-0">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            {movieToEdit ? <Save className="h-5 w-5 mr-2 text-brand-500" /> : <Wand2 className="h-5 w-5 mr-2 text-brand-500" />}
-            {movieToEdit ? 'Editar Película' : 'Agregar Película'}
+      <div className="relative bg-[#111218] rounded-3xl w-full max-w-lg border border-white/10 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-fade-in">
+        
+        <div className="h-1 w-full bg-white/5 shrink-0">
+            <div className={`h-full bg-brand-500 transition-all duration-700 ${title ? 'w-1/2' : 'w-4'} ${streamUrl ? 'w-full' : ''}`} />
+        </div>
+
+        <div className="p-6 border-b border-white/5 flex justify-between items-center shrink-0">
+          <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase italic">
+            {movieToEdit ? 'Editar Contenido' : 'Añadir a la Red'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white">
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="p-5 space-y-5 overflow-y-auto custom-scrollbar">
+        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
             
-          {!movieToEdit && (
-              <div className="bg-brand-900/50 border border-brand-500/30 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold text-white">Modo Automático (IA)</span>
-                    <button 
-                        onClick={() => setAutoMode(!autoMode)}
-                        className={`w-10 h-6 rounded-full p-1 transition-colors ${autoMode ? 'bg-brand-500' : 'bg-gray-600'}`}
-                    >
-                        <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${autoMode ? 'translate-x-4' : ''}`} />
-                    </button>
-                </div>
-                <p className="text-xs text-gray-400">
-                    {autoMode ? "La IA escribirá la descripción y datos." : "Tú escribes todos los detalles manualmente."}
-                </p>
+          <div className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Nombre del Contenido</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:border-brand-500 outline-none transition-all font-bold text-lg"
+                  placeholder="Ej: El Juego del Calamar 2"
+                />
               </div>
-          )}
 
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase">Título</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-              placeholder="Ej: Avatar: Fire and Ash"
-            />
-          </div>
-
-          {(!autoMode || movieToEdit) && (
-              <div className="space-y-4 animate-fade-in">
-                  
-                  {/* MANUAL FIELDS */}
-                  
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase">Link Streaming (Video)</label>
-                    <div className="relative">
-                      <LinkIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-500" />
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Enlace (TeraBox / URL)</label>
+                <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <LinkIcon className="absolute left-4 top-4 h-5 w-5 text-gray-500" />
                       <input
                         type="text"
                         value={streamUrl}
                         onChange={(e) => setStreamUrl(e.target.value)}
-                        className="w-full bg-[#0f1014] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-                        placeholder="https://..."
+                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white focus:border-brand-500 outline-none transition-all text-xs font-mono"
+                        placeholder="Pega aquí el link..."
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase">Link Imagen (Poster)</label>
-                    <div className="relative">
-                      <ImageIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-500" />
-                      <input
-                        type="text"
-                        value={posterUrl}
-                        onChange={(e) => setPosterUrl(e.target.value)}
-                        className="w-full bg-[#0f1014] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-                        placeholder="https://imagen.jpg"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase flex items-center gap-2">
-                        <FileText className="h-4 w-4" /> Sinopsis / Descripción
-                    </label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none h-24 resize-none"
-                        placeholder="Escribe de qué trata la película..."
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase flex items-center gap-2">
-                            <Calendar className="h-4 w-4" /> Año
-                        </label>
-                        <input
-                            type="text"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-                            placeholder="2025"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase flex items-center gap-2">
-                            <Star className="h-4 w-4 text-yellow-500" /> Calificación (1-10)
-                        </label>
-                        <input
-                            type="number"
-                            max="10"
-                            step="0.1"
-                            value={rating}
-                            onChange={(e) => setRating(e.target.value)}
-                            className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-                            placeholder="8.5"
-                        />
-                      </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase flex items-center gap-2">
-                        <Clapperboard className="h-4 w-4" /> Géneros (Separados por coma)
-                    </label>
-                    <input
-                        type="text"
-                        value={genre}
-                        onChange={(e) => setGenre(e.target.value)}
-                        className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none"
-                        placeholder="Acción, Drama, Sci-Fi"
-                    />
-                  </div>
+                    {streamUrl && (
+                        <button 
+                            onClick={resolveLink}
+                            disabled={resolving}
+                            className="bg-brand-500 hover:bg-red-600 text-white px-5 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                        >
+                            {resolving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                        </button>
+                    )}
+                </div>
               </div>
-          )}
 
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                Ranking Tendencias (Opcional)
-            </label>
-            <input
-                type="number"
-                min="1"
-                max="10"
-                value={trendingRank}
-                onChange={(e) => setTrendingRank(e.target.value)}
-                className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 outline-none"
-                placeholder="Ej: 1 para Top #1"
-            />
+              {/* MODO REPRODUCTOR */}
+              <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${isDirectLink ? 'bg-brand-500/10 border-brand-500/30' : 'bg-white/5 border-white/5'}`}>
+                  <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${isDirectLink ? 'bg-brand-500 text-white shadow-lg' : 'bg-gray-800 text-gray-500'}`}>
+                        <MonitorPlay className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <span className="block text-xs font-black text-white uppercase italic">Modo SamPlayer Pro</span>
+                        <span className="block text-[10px] text-gray-500 font-bold uppercase">{isDirectLink ? 'Video Nativo (MP4/M3U8)' : 'Reproductor Externo (Embed)'}</span>
+                      </div>
+                  </div>
+                  <button 
+                    onClick={() => setIsDirectLink(!isDirectLink)}
+                    className={`w-14 h-7 rounded-full p-1 transition-colors ${isDirectLink ? 'bg-brand-500' : 'bg-gray-700'}`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform ${isDirectLink ? 'translate-x-7' : ''}`} />
+                  </button>
+              </div>
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          {status && <p className="text-blue-400 text-sm animate-pulse">{status}</p>}
+          {!autoMode || movieToEdit ? (
+            <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
+                <input
+                    type="text"
+                    value={posterUrl}
+                    onChange={(e) => setPosterUrl(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"
+                    placeholder="URL del Poster..."
+                />
+                <div className="grid grid-cols-2 gap-4">
+                    <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Año" />
+                    <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" placeholder="Rating" />
+                </div>
+            </div>
+          ) : (
+             <div className="bg-brand-500/5 p-4 rounded-2xl border border-brand-500/20 flex items-center gap-3">
+                 <Wand2 className="h-5 w-5 text-brand-500 animate-pulse" />
+                 <p className="text-[10px] text-gray-400 uppercase font-black leading-tight tracking-widest">
+                    IA Generativa: Detectaremos póster, año y géneros automáticamente.
+                 </p>
+             </div>
+          )}
 
-          <div className="flex gap-3 pt-2">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+                <p className="text-red-400 text-[10px] font-bold uppercase leading-tight">{error}</p>
+            </div>
+          )}
+          
+          {status && <p className="text-brand-500 text-[10px] font-black animate-pulse text-center uppercase tracking-widest">{status}</p>}
+
+          <div className="flex gap-3 pt-4 shrink-0 pb-2">
             <button
                 onClick={handleSmartGenerateAndSave}
-                disabled={!title || loading || deleteLoading}
-                className={`flex-1 py-3 rounded-lg font-bold text-white shadow-lg flex items-center justify-center transition-all ${
-                !title || loading || deleteLoading
-                    ? 'bg-gray-600 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-brand-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-                }`}
+                disabled={!title || !streamUrl || loading || deleteLoading}
+                className="flex-1 py-5 rounded-2xl font-black text-white shadow-xl bg-gradient-to-r from-brand-500 to-red-800 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 uppercase tracking-widest italic text-sm"
             >
-                {loading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : 'Guardar Cambios'}
+                {loading ? <Loader2 className="animate-spin h-6 w-6" /> : (movieToEdit ? 'Guardar Cambios' : 'Publicar Ahora')}
             </button>
             
             {movieToEdit && (
-                <>
-                    {showDeleteConfirm ? (
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleteLoading}
-                            className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold flex items-center gap-2 animate-fade-in"
-                        >
-                           {deleteLoading ? <Loader2 className="animate-spin h-4 w-4" /> : <AlertTriangle className="h-5 w-5" />}
-                           ¿Seguro?
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => setShowDeleteConfirm(true)}
-                            className="px-4 py-3 bg-red-900/30 text-red-500 border border-red-500/30 hover:bg-red-900/50 hover:text-red-400 rounded-lg transition-colors flex items-center justify-center"
-                            title="Eliminar Película"
-                        >
-                            <Trash2 className="h-5 w-5" />
-                        </button>
-                    )}
-                </>
+                <button
+                    onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
+                    className={`px-6 rounded-2xl font-bold transition-all border ${showDeleteConfirm ? 'bg-red-600 border-red-600 text-white animate-pulse' : 'bg-white/5 text-red-500 border-red-500/20'}`}
+                >
+                    <Trash2 className="h-6 w-6" />
+                </button>
             )}
           </div>
           

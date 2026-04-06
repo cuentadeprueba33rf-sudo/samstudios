@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Save, Trash2, Loader2, Image as ImageIcon, Film, Trophy, AlertTriangle } from 'lucide-react';
-import { supabase } from '../services/supabaseClient';
+import { db } from '../services/firebase';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Actor } from '../types';
 
 interface AddActorModalProps {
@@ -50,17 +51,13 @@ export const AddActorModal: React.FC<AddActorModalProps> = ({ onClose, onSave, a
 
       if (actorToEdit) {
         // Update
-        const { error } = await supabase
-          .from('actors')
-          .update(actorData)
-          .eq('id', actorToEdit.id);
-        if (error) throw error;
+        const actorRef = doc(db, 'actors', actorToEdit.id);
+        await setDoc(actorRef, actorData, { merge: true });
       } else {
         // Insert
-        const { error } = await supabase
-          .from('actors')
-          .insert([actorData]);
-        if (error) throw error;
+        const newId = crypto.randomUUID();
+        const actorRef = doc(db, 'actors', newId);
+        await setDoc(actorRef, { ...actorData, id: newId, created_at: new Date().toISOString() });
       }
 
       onSave();
@@ -76,8 +73,7 @@ export const AddActorModal: React.FC<AddActorModalProps> = ({ onClose, onSave, a
     if (!actorToEdit) return;
     setDeleteLoading(true);
     try {
-      const { error } = await supabase.from('actors').delete().eq('id', actorToEdit.id);
-      if (error) throw error;
+      await deleteDoc(doc(db, 'actors', actorToEdit.id));
       onSave();
       onClose();
     } catch (err: any) {

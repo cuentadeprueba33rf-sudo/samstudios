@@ -10,7 +10,8 @@ export interface Movie {
   director?: string;
   actors?: string[];
   imdbId?: string; // Optional IMDB ID for auto-embed
-  trendingRank?: number; // 1-10 for Trending row
+  trendingRank?: number | null; // 1-10 for Trending row
+  isDirectLink?: boolean; // NEW: True if the link is a raw .mp4/.mkv file
 }
 
 export interface Actor {

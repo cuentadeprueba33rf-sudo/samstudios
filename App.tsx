@@ -11,7 +11,9 @@ import { LoginModal } from './components/LoginModal';
 import { RequestModal } from './components/RequestModal'; 
 import { Movie, ViewState } from './types';
 import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3 } from 'lucide-react';
-import { supabase } from './services/supabaseClient'; 
+import { db, auth } from './services/firebase';
+import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // CONFIG
 const ADMIN_EMAIL = "samuelcasseresbx@gmail.com"; 
@@ -397,26 +399,18 @@ const App = () => {
 
   // 1. Check Auth on Mount
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setSession(user ? { user } : null);
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   const fetchMovies = async () => {
-        const { data, error } = await supabase
-            .from('movies')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (!error && data) {
+        try {
+            const q = query(collection(db, 'movies'), orderBy('created_at', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const data = querySnapshot.docs.map(doc => doc.data() as Movie);
+            
             if (data.length > 5) {
                 setMovies(data);
                 setUsingLocalData(false);
@@ -427,7 +421,7 @@ const App = () => {
                 setMovies(Array.from(movieMap.values()));
                 setUsingLocalData(true);
             }
-        } else {
+        } catch (error) {
             console.error("Error fetching movies:", error);
             setUsingLocalData(true);
         }
@@ -443,20 +437,25 @@ const App = () => {
       setSyncLoading(true);
       try {
           const moviesToUpload = INITIAL_MOVIES.map(m => {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { id, ...rest } = m; 
-              return {
-                  ...rest,
+              const movieObj: any = {
+                  ...m,
                   genre: m.genre || [],
                   actors: m.actors || []
               };
+              
+              // Remove undefined fields
+              Object.keys(movieObj).forEach(key => {
+                  if (movieObj[key] === undefined) {
+                      delete movieObj[key];
+                  }
+              });
+              
+              return movieObj;
           });
 
           for (const movie of moviesToUpload) {
-             const { data } = await supabase.from('movies').select('id').eq('title', movie.title).single();
-             if (!data) {
-                 await supabase.from('movies').insert(movie);
-             }
+             const movieRef = doc(db, 'movies', movie.id);
+             await setDoc(movieRef, { ...movie, created_at: new Date().toISOString() }, { merge: true });
           }
           
           alert("¡Catálogo sincronizado con éxito! Ahora tus cambios serán permanentes.");
@@ -514,13 +513,14 @@ const App = () => {
   };
 
   const handleDeleteMovie = async (movieId: string) => {
-      const { error } = await supabase.from('movies').delete().eq('id', movieId);
-      if (error) {
+      try {
+          await deleteDoc(doc(db, 'movies', movieId));
+          setMovies(prev => prev.filter(m => m.id !== movieId));
+          setSelectedMovie(null);
+          setCurrentView(ViewState.HOME);
+      } catch (error: any) {
           throw new Error(error.message);
       }
-      setMovies(prev => prev.filter(m => m.id !== movieId));
-      setSelectedMovie(null);
-      setCurrentView(ViewState.HOME);
   };
 
   const toggleMyList = (movieId: string) => {
@@ -532,7 +532,7 @@ const App = () => {
   };
 
   const handleLogout = async () => {
-      await supabase.auth.signOut();
+      await signOut(auth);
   };
 
   // Handle Accept Disclaimer

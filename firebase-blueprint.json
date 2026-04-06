@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Movie": {
+      "title": "Movie",
+      "description": "A movie in the catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "year": { "type": "string" },
+        "genre": { "type": "array", "items": { "type": "string" } },
+        "posterUrl": { "type": "string" },
+        "streamUrl": { "type": "string" },
+        "rating": { "type": "number" },
+        "director": { "type": "string" },
+        "actors": { "type": "array", "items": { "type": "string" } },
+        "imdbId": { "type": "string" },
+        "trendingRank": { "type": "number" },
+        "isDirectLink": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "description", "year", "genre", "posterUrl", "streamUrl", "rating"]
+    },
+    "Actor": {
+      "title": "Actor",
+      "description": "An actor in the catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "character": { "type": "string" },
+        "movie": { "type": "string" },
+        "image": { "type": "string" },
+        "award": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "character", "movie", "image"]
+    }
+  },
+  "firestore": {
+    "/movies/{movieId}": {
+      "schema": { "$ref": "#/entities/Movie" },
+      "description": "Movies collection"
+    },
+    "/actors/{actorId}": {
+      "schema": { "$ref": "#/entities/Actor" },
+      "description": "Actors collection"
+    }
+  }
+}

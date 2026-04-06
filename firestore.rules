@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: movies
+    // Document ID: {movieId}
+    // Fields:
+    //   - id: string (required)
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - year: string (required)
+    //   - genre: list of strings (required)
+    //   - posterUrl: string (required)
+    //   - streamUrl: string (required)
+    //   - rating: number (required)
+    //   - director: string (optional)
+    //   - actors: list of strings (optional)
+    //   - imdbId: string (optional)
+    //   - trendingRank: number (optional)
+    //   - isDirectLink: boolean (optional)
+    //   - created_at: string (optional)
+    //
+    // Collection: actors
+    // Document ID: {actorId}
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required)
+    //   - character: string (required)
+    //   - movie: string (required)
+    //   - image: string (required)
+    //   - award: string (optional)
+    //   - created_at: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == "cuentadeprueba33rf@gmail.com" && request.auth.token.email_verified == true;
+    }
+
+    function hasRequiredMovieFields() {
+      return request.resource.data.keys().hasAll(['id', 'title', 'description', 'year', 'genre', 'posterUrl', 'streamUrl', 'rating']);
+    }
+
+    function isValidMovie() {
+      return hasRequiredMovieFields() &&
+             request.resource.data.id is string &&
+             request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() < 200 &&
+             request.resource.data.description is string && request.resource.data.description.size() < 5000 &&
+             request.resource.data.year is string && request.resource.data.year.size() <= 4 &&
+             request.resource.data.genre is list && request.resource.data.genre.size() <= 20 &&
+             request.resource.data.posterUrl is string && request.resource.data.posterUrl.size() < 1000 &&
+             request.resource.data.streamUrl is string && request.resource.data.streamUrl.size() < 1000 &&
+             request.resource.data.rating is number && request.resource.data.rating >= 0 && request.resource.data.rating <= 10;
+    }
+
+    function hasRequiredActorFields() {
+      return request.resource.data.keys().hasAll(['id', 'name', 'character', 'movie', 'image']);
+    }
+
+    function isValidActor() {
+      return hasRequiredActorFields() &&
+             request.resource.data.id is string &&
+             request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() < 100 &&
+             request.resource.data.character is string && request.resource.data.character.size() < 100 &&
+             request.resource.data.movie is string && request.resource.data.movie.size() < 200 &&
+             request.resource.data.image is string && request.resource.data.image.size() < 1000;
+    }
+
+    match /movies/{movieId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidMovie();
+      allow update: if isAdmin() && isValidMovie();
+      allow delete: if isAdmin();
+    }
+
+    match /actors/{actorId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidActor();
+      allow update: if isAdmin() && isValidActor();
+      allow delete: if isAdmin();
+    }
+  }
+}

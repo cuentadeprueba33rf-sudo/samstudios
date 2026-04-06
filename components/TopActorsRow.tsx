@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Trophy, Crown, Sparkles, Pencil, Plus } from 'lucide-react';
-import { supabase } from '../services/supabaseClient';
+import { db } from '../services/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { Actor } from '../types';
 import { AddActorModal } from './AddActorModal';
 
@@ -15,13 +16,13 @@ export const TopActorsRow: React.FC<TopActorsRowProps> = ({ isAdmin }) => {
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
 
   const fetchActors = async () => {
-      const { data, error } = await supabase
-        .from('actors')
-        .select('*')
-        .order('created_at', { ascending: true }); // Simple ordering by creation for now
-      
-      if (!error && data) {
-          setActors(data as Actor[]);
+      try {
+          const q = query(collection(db, 'actors'), orderBy('created_at', 'asc'));
+          const querySnapshot = await getDocs(q);
+          const data = querySnapshot.docs.map(doc => doc.data() as Actor);
+          setActors(data);
+      } catch (error) {
+          console.error("Error fetching actors:", error);
       }
   };
 
