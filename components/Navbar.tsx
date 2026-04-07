@@ -11,6 +11,7 @@ interface NavbarProps {
   searchTerm: string;
   onSearchChange: (val: string) => void;
   isAdmin: boolean;
+  isLoggedIn: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
@@ -22,7 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRequestClick,
   searchTerm, 
   onSearchChange,
-  isAdmin
+  isAdmin,
+  isLoggedIn
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
@@ -120,14 +122,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                     )}
                     
-                    {isAdmin && (
-                      <div 
-                        onClick={onUserClick}
-                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center cursor-pointer transition-colors bg-white/10 hover:bg-white/20 border border-white/10"
-                      >
-                          <LogOut className="h-4 w-4 text-white" />
-                      </div>
-                    )}
+                    <button 
+                      onClick={onUserClick}
+                      className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all border font-medium text-xs sm:text-sm uppercase tracking-wider
+                        ${isLoggedIn 
+                          ? 'bg-brand-500/10 border-brand-500/30 text-brand-400 hover:bg-brand-500/20' 
+                          : 'bg-white text-black border-white hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                        }`}
+                      title={isLoggedIn ? "Cerrar Sesión" : "Iniciar Sesión"}
+                    >
+                        {isLoggedIn ? (
+                            <>
+                                <LogOut className="h-4 w-4" />
+                                <span className="hidden xs:inline">Salir</span>
+                            </>
+                        ) : (
+                            <>
+                                <User className="h-4 w-4" />
+                                <span>Entrar</span>
+                            </>
+                        )}
+                    </button>
                 </>
             )}
           </div>

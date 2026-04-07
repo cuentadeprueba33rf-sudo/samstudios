@@ -6,6 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 interface RequestModalProps {
   onClose: () => void;
+  onLoginClick?: () => void;
 }
 
 enum OperationType {
@@ -36,7 +37,7 @@ interface FirestoreErrorInfo {
   }
 }
 
-export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
+export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClick }) => {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('Película');
   const [note, setNote] = useState('');
@@ -78,7 +79,7 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
     if (!title) return;
     
     if (!auth.currentUser) {
-        alert("Debes iniciar sesión para enviar una solicitud.");
+        if (onLoginClick) onLoginClick();
         return;
     }
 
@@ -184,11 +185,20 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
             </div>
 
             {!user && (
-                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-3 mb-4">
-                    <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
-                    <p className="text-xs text-yellow-200">
-                        Debes iniciar sesión para poder enviar solicitudes.
-                    </p>
+                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex flex-col gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                        <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
+                        <p className="text-xs text-yellow-200">
+                            Debes iniciar sesión para poder enviar solicitudes.
+                        </p>
+                    </div>
+                    <button 
+                        onClick={onLoginClick}
+                        className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition-all"
+                    >
+                        <LogIn className="h-4 w-4" />
+                        Iniciar Sesión para Pedir
+                    </button>
                 </div>
             )}
 
@@ -200,7 +210,7 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
                 `}
             >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-4 w-4" />}
-                {loading ? 'Enviando...' : 'Enviar Solicitud'}
+                {loading ? 'Enviando...' : user ? 'Enviar Solicitud' : 'Inicia sesión primero'}
             </button>
             
             <p className="text-[10px] text-center text-gray-500">

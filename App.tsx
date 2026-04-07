@@ -551,12 +551,13 @@ const App = () => {
         onAddClick={() => { setSelectedMovie(null); setCurrentView(ViewState.ADD_MOVIE); }}
         onHomeClick={() => { setCurrentView(ViewState.HOME); setSearchTerm(''); }}
         onMyListClick={() => setCurrentView(ViewState.MY_LIST)}
-        onUserClick={() => isAdmin ? handleLogout() : setCurrentView(ViewState.LOGIN)}
+        onUserClick={() => session ? handleLogout() : setCurrentView(ViewState.LOGIN)}
         onAdminClick={() => isAdmin && setCurrentView(ViewState.ADMIN)}
         onRequestClick={() => setCurrentView(ViewState.REQUEST)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         isAdmin={isAdmin}
+        isLoggedIn={!!session}
       />
 
       {currentView === ViewState.ADMIN && isAdmin && (
@@ -577,6 +578,7 @@ const App = () => {
       {currentView === ViewState.REQUEST && (
         <RequestModal 
             onClose={() => setCurrentView(ViewState.HOME)}
+            onLoginClick={() => setCurrentView(ViewState.LOGIN)}
         />
       )}
 
