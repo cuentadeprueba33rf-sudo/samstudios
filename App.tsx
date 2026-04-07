@@ -404,7 +404,7 @@ const App = () => {
   
   // Auth State
   const [session, setSession] = useState<any>(null);
-  const isAdmin = !!session?.user;
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
   // 1. Check Auth on Mount
   useEffect(() => {
@@ -558,14 +558,6 @@ const App = () => {
         onSearchChange={setSearchTerm}
         isAdmin={isAdmin}
       />
-
-      {currentView === ViewState.ADMIN && isAdmin && (
-        <AdminPanel 
-          onBack={() => setCurrentView(ViewState.HOME)} 
-          initialMovies={INITIAL_MOVIES}
-          onSyncComplete={fetchMovies}
-        />
-      )}
 
       {currentView === ViewState.ADMIN && isAdmin && (
         <AdminPanel 

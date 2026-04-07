@@ -1,10 +1,39 @@
-import React, { useState } from 'react';
-import { Send, X, MessageSquarePlus, Film, Tv, Loader2, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, X, MessageSquarePlus, Film, Tv, Loader2, CheckCircle2, AlertCircle, LogIn } from 'lucide-react';
 import { db, auth } from '../services/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface RequestModalProps {
   onClose: () => void;
+}
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
 }
 
 export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
@@ -13,9 +42,45 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [user, setUser] = useState<any>(auth.currentUser);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
+    const errInfo: FirestoreErrorInfo = {
+      error: error instanceof Error ? error.message : String(error),
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        emailVerified: auth.currentUser?.emailVerified,
+        isAnonymous: auth.currentUser?.isAnonymous,
+        tenantId: auth.currentUser?.tenantId,
+        providerInfo: auth.currentUser?.providerData.map(provider => ({
+          providerId: provider.providerId,
+          displayName: provider.displayName,
+          email: provider.email,
+          photoUrl: provider.photoURL
+        })) || []
+      },
+      operationType,
+      path
+    };
+    console.error('Firestore Error: ', JSON.stringify(errInfo));
+    throw new Error(JSON.stringify(errInfo));
+  };
 
   const handleSend = async () => {
-    if (!title || !auth.currentUser) return;
+    if (!title) return;
+    
+    if (!auth.currentUser) {
+        alert("Debes iniciar sesión para enviar una solicitud.");
+        return;
+    }
 
     setLoading(true);
     try {
@@ -34,8 +99,7 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
             onClose();
         }, 2000);
     } catch (error) {
-        console.error("Error saving request:", error);
-        alert("Hubo un error al enviar tu solicitud. Por favor, intenta de nuevo.");
+        handleFirestoreError(error, OperationType.WRITE, 'requests');
     } finally {
         setLoading(false);
     }
@@ -119,11 +183,20 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose }) => {
                 />
             </div>
 
+            {!user && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-3 mb-4">
+                    <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
+                    <p className="text-xs text-yellow-200">
+                        Debes iniciar sesión para poder enviar solicitudes.
+                    </p>
+                </div>
+            )}
+
             <button 
                 onClick={handleSend}
-                disabled={!title || loading}
+                disabled={!title || loading || !user}
                 className={`w-full py-3.5 rounded-lg font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all mt-2
-                    ${title && !loading ? 'bg-white text-black hover:bg-gray-200 hover:scale-[1.02]' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+                    ${title && !loading && user ? 'bg-white text-black hover:bg-gray-200 hover:scale-[1.02]' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
                 `}
             >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-4 w-4" />}
