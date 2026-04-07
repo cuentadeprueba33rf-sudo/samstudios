@@ -1,109 +1,143 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  const [animating, setAnimating] = useState(true);
+  const [stage, setStage] = useState(0);
 
   useEffect(() => {
-    // Duración total de la animación (4 segundos aprox)
-    const timer = setTimeout(() => {
-      setAnimating(false);
-      onFinish();
-    }, 3800);
+    // Stage 0: Black screen
+    // Stage 1: Ignition spark (0.4s)
+    // Stage 2: Text reveal & glow (1.0s)
+    // Stage 3: The Dive / Zoom out (3.5s)
+    // Finish: Unmount (4.8s)
+    
+    const t1 = setTimeout(() => setStage(1), 400);
+    const t2 = setTimeout(() => setStage(2), 1000);
+    const t3 = setTimeout(() => setStage(3), 3500);
+    const t4 = setTimeout(() => onFinish(), 4800);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
   }, [onFinish]);
 
-  if (!animating) return null;
+  const text = "SAM STUDIOS";
+  const letters = text.split("");
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-[200] bg-[#020202] flex items-center justify-center overflow-hidden perspective-[1000px]">
       
-      {/* Container de la animación */}
-      <div className="relative flex flex-col items-center justify-center w-full h-full animate-intro-sequence">
-        
-        {/* LOGO */}
-        {/* El logo comienza pequeño, crece un poco (tensión) y luego hace un zoom masivo hacia la cámara */}
-        <h1 className="text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter text-[#E50914] select-none scale-100 opacity-0 animate-netflix-pop">
-            SAMSTUDIOS
-        </h1>
+      {/* Cinematic Film Grain Overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.04] pointer-events-none z-50" 
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}
+      />
 
-        {/* Sombra/Glow sutil detrás para dar profundidad */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E50914]/10 to-transparent opacity-0 animate-glow-pulse pointer-events-none" />
+      {/* Ambient Deep Glow */}
+      <motion.div 
+        className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(229,9,20,0.15)_0%,_transparent_60%)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: stage >= 2 ? 1 : 0 }}
+        transition={{ duration: 2 }}
+      />
 
-        {/* Mensaje de bienvenida sutil */}
-        <div className="absolute bottom-10 text-white/40 text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase animate-fade-in-delayed">
-            ¿No encuentras tu película? Solicítala al entrar
-        </div>
+      <AnimatePresence>
+        {stage < 3 && (
+          <motion.div
+            key="logo-container"
+            className="relative flex flex-col items-center justify-center z-20"
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 3.5, ease: "easeOut" }}
+            exit={{ 
+              scale: 40, 
+              opacity: 0, 
+              filter: "blur(20px)"
+            }}
+            // Using a custom cubic-bezier for a dramatic "swoosh" dive into the screen
+            style={{ transformOrigin: "center center" }}
+          >
+            {/* The Ignition Spark */}
+            {stage === 1 && (
+              <motion.div
+                className="absolute h-[2px] bg-white shadow-[0_0_20px_2px_#E50914,0_0_40px_4px_#E50914]"
+                initial={{ width: "0%", opacity: 0 }}
+                animate={{ width: "150%", opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 0.6, ease: "easeInOut", times: [0, 0.2, 0.8, 1] }}
+              />
+            )}
 
-      </div>
+            {/* The Text */}
+            <div className="flex space-x-1 sm:space-x-2 overflow-visible px-4 relative">
+              {letters.map((letter, i) => (
+                <motion.span
+                  key={i}
+                  className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter relative"
+                  initial={{ 
+                    opacity: 0, 
+                    y: 20, 
+                    scale: 1.1,
+                    filter: "blur(10px)" 
+                  }}
+                  animate={stage >= 2 ? { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    filter: "blur(0px)" 
+                  } : {}}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: i * 0.06, 
+                    ease: [0.2, 0.65, 0.3, 0.9] 
+                  }}
+                >
+                  {/* Base Text */}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-gray-200 to-gray-600 relative z-10">
+                    {letter === " " ? "\u00A0" : letter}
+                  </span>
+                  
+                  {/* Glowing Outline / Shadow */}
+                  <motion.span 
+                    className="absolute inset-0 text-[#E50914] blur-[16px] z-0"
+                    initial={{ opacity: 0 }}
+                    animate={stage >= 2 ? { opacity: [0, 0.8, 0.3] } : {}}
+                    transition={{ duration: 2, delay: i * 0.06 + 0.2 }}
+                  >
+                    {letter === " " ? "\u00A0" : letter}
+                  </motion.span>
+                </motion.span>
+              ))}
+              
+              {/* Lens Flare Sweep */}
+              {stage >= 2 && (
+                <motion.div
+                  className="absolute top-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 blur-[10px] skew-x-[-25deg] z-20 mix-blend-overlay"
+                  initial={{ left: "-30%" }}
+                  animate={{ left: "130%" }}
+                  transition={{ duration: 1.8, delay: 0.4, ease: "easeInOut" }}
+                />
+              )}
+            </div>
 
-      <style>{`
-        /* 
-           Secuencia estilo Netflix:
-           1. (0-20%) Aparece de golpe (Pop) o fade rápido.
-           2. (20-70%) Crece muy lentamente (Tensión).
-           3. (70-100%) Zoom masivo hacia la cámara (Entrada a la app).
-        */
-        @keyframes netflix-pop {
-            0% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            20% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            70% {
-                opacity: 1;
-                transform: scale(1.1); /* Crece sutilmente */
-            }
-            100% {
-                opacity: 0;
-                transform: scale(30); /* El usuario "atraviesa" el logo */
-            }
-        }
-
-        @keyframes fade-in-delayed {
-            0%, 40% { opacity: 0; transform: translateY(10px); }
-            60% { opacity: 1; transform: translateY(0); }
-            85% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* El contenedor hace fade-out al final para suavizar la transición a la app */
-        @keyframes intro-sequence {
-            0% { background-color: black; }
-            90% { background-color: black; }
-            100% { background-color: transparent; }
-        }
-
-        /* Un destello sutil en el fondo */
-        @keyframes glow-pulse {
-            0% { opacity: 0; }
-            30% { opacity: 0.3; }
-            100% { opacity: 0; }
-        }
-
-        .animate-netflix-pop {
-            animation: netflix-pop 3.5s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-        }
-
-        .animate-intro-sequence {
-            animation: intro-sequence 3.8s ease-out forwards;
-        }
-
-        .animate-glow-pulse {
-            animation: glow-pulse 3.5s ease-in-out forwards;
-        }
-
-        .animate-fade-in-delayed {
-            animation: fade-in-delayed 3.5s ease-out forwards;
-        }
-      `}</style>
+            {/* Subtitle */}
+            <motion.div
+              className="absolute -bottom-10 sm:-bottom-14 text-white/50 text-[9px] sm:text-[11px] font-bold tracking-[1em] uppercase"
+              initial={{ opacity: 0, y: -10, filter: "blur(5px)" }}
+              animate={stage >= 2 ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+              transition={{ duration: 1.2, delay: 1.2, ease: "easeOut" }}
+            >
+              Originals
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
