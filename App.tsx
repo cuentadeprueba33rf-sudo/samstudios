@@ -385,13 +385,6 @@ const App = () => {
     return false;
   });
 
-  const [protectAccepted, setProtectAccepted] = useState(() => {
-    if (typeof window !== 'undefined') {
-        return sessionStorage.getItem('samstudios_protect_v1') === 'true';
-    }
-    return false;
-  });
-
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   
@@ -522,13 +515,6 @@ const App = () => {
     return <DisclaimerModal onAccept={handleAcceptDisclaimer} />;
   }
 
-  if (!protectAccepted) {
-    return <SamIAProtect onClose={() => {
-        sessionStorage.setItem('samstudios_protect_v1', 'true');
-        setProtectAccepted(true);
-    }} />;
-  }
-
   if (currentView === ViewState.PLAYER && selectedMovie) {
     return (
       <Player 
@@ -561,6 +547,8 @@ const App = () => {
         isAdmin={isAdmin}
         isLoggedIn={!!session}
       />
+
+      <SamIAProtect />
 
       {currentView === ViewState.ADMIN && isAdmin && (
         <AdminPanel 

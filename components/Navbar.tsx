@@ -88,9 +88,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             
             {/* SAM IA PROTECT BADGE */}
             {!mobileSearchActive && (
-                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-[10px] font-black text-brand-400 uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.1)]">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    SAM IA PROTECT
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-gray-400 uppercase tracking-widest transition-all hover:border-brand-500/30 group">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-brand-500/20 rounded-full blur-sm animate-pulse" />
+                        <ShieldCheck className="h-3.5 w-3.5 text-brand-500" />
+                    </div>
+                    <span className="group-hover:text-white transition-colors">Protección SAM IA Activa</span>
+                    <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />
                 </div>
             )}
 
