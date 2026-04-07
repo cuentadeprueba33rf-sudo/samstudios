@@ -387,8 +387,40 @@ const App = () => {
     return false;
   });
 
-  const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [currentView, setCurrentView] = useState<ViewState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('samstudios_currentView');
+      if (saved) return saved as ViewState;
+    }
+    return ViewState.HOME;
+  });
+  
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('samstudios_selectedMovie');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('samstudios_currentView', currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    if (selectedMovie) {
+      sessionStorage.setItem('samstudios_selectedMovie', JSON.stringify(selectedMovie));
+    } else {
+      sessionStorage.removeItem('samstudios_selectedMovie');
+    }
+  }, [selectedMovie]);
+
   const [movieToRate, setMovieToRate] = useState<Movie | null>(null);
   
   // State for Movies
