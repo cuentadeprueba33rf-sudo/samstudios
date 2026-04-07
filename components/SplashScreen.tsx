@@ -7,18 +7,31 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const [stage, setStage] = useState(0);
+  const [isFastMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('samstudios_splash_seen') === 'true';
+    }
+    return false;
+  });
+
+  // 4x faster if the user has already seen it this session
+  const speed = isFastMode ? 0.25 : 1;
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('samstudios_splash_seen', 'true');
+    }
+
     // Stage 0: Black screen
-    // Stage 1: Ignition spark (0.4s)
-    // Stage 2: Text reveal & glow (1.0s)
-    // Stage 3: The Dive / Zoom out (3.5s)
-    // Finish: Unmount (4.8s)
+    // Stage 1: Ignition spark
+    // Stage 2: Text reveal & glow
+    // Stage 3: The Dive / Zoom out
+    // Finish: Unmount
     
-    const t1 = setTimeout(() => setStage(1), 400);
-    const t2 = setTimeout(() => setStage(2), 1000);
-    const t3 = setTimeout(() => setStage(3), 3500);
-    const t4 = setTimeout(() => onFinish(), 4800);
+    const t1 = setTimeout(() => setStage(1), 400 * speed);
+    const t2 = setTimeout(() => setStage(2), 1000 * speed);
+    const t3 = setTimeout(() => setStage(3), 3500 * speed);
+    const t4 = setTimeout(() => onFinish(), 4800 * speed);
 
     return () => {
       clearTimeout(t1);
@@ -26,7 +39,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, [onFinish]);
+  }, [onFinish, speed]);
 
   const text = "SAM STUDIOS";
   const letters = text.split("");
@@ -45,7 +58,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(229,9,20,0.15)_0%,_transparent_60%)]"
         initial={{ opacity: 0 }}
         animate={{ opacity: stage >= 2 ? 1 : 0 }}
-        transition={{ duration: 2 }}
+        transition={{ duration: 2 * speed }}
       />
 
       <AnimatePresence>
@@ -55,7 +68,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             className="relative flex flex-col items-center justify-center z-20"
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 3.5, ease: "easeOut" }}
+            transition={{ duration: 3.5 * speed, ease: "easeOut" }}
             exit={{ 
               scale: 40, 
               opacity: 0, 
@@ -70,7 +83,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                 className="absolute h-[2px] bg-white shadow-[0_0_20px_2px_#E50914,0_0_40px_4px_#E50914]"
                 initial={{ width: "0%", opacity: 0 }}
                 animate={{ width: "150%", opacity: [0, 1, 1, 0] }}
-                transition={{ duration: 0.6, ease: "easeInOut", times: [0, 0.2, 0.8, 1] }}
+                transition={{ duration: 0.6 * speed, ease: "easeInOut", times: [0, 0.2, 0.8, 1] }}
               />
             )}
 
@@ -93,8 +106,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                     filter: "blur(0px)" 
                   } : {}}
                   transition={{ 
-                    duration: 0.8, 
-                    delay: i * 0.06, 
+                    duration: 0.8 * speed, 
+                    delay: (i * 0.06) * speed, 
                     ease: [0.2, 0.65, 0.3, 0.9] 
                   }}
                 >
@@ -108,7 +121,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                     className="absolute inset-0 text-[#E50914] blur-[16px] z-0"
                     initial={{ opacity: 0 }}
                     animate={stage >= 2 ? { opacity: [0, 0.8, 0.3] } : {}}
-                    transition={{ duration: 2, delay: i * 0.06 + 0.2 }}
+                    transition={{ duration: 2 * speed, delay: (i * 0.06 + 0.2) * speed }}
                   >
                     {letter === " " ? "\u00A0" : letter}
                   </motion.span>
@@ -121,7 +134,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                   className="absolute top-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 blur-[10px] skew-x-[-25deg] z-20 mix-blend-overlay"
                   initial={{ left: "-30%" }}
                   animate={{ left: "130%" }}
-                  transition={{ duration: 1.8, delay: 0.4, ease: "easeInOut" }}
+                  transition={{ duration: 1.8 * speed, delay: 0.4 * speed, ease: "easeInOut" }}
                 />
               )}
             </div>
@@ -131,7 +144,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
               className="absolute -bottom-10 sm:-bottom-14 text-white/50 text-[9px] sm:text-[11px] font-bold tracking-[1em] uppercase"
               initial={{ opacity: 0, y: -10, filter: "blur(5px)" }}
               animate={stage >= 2 ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
-              transition={{ duration: 1.2, delay: 1.2, ease: "easeOut" }}
+              transition={{ duration: 1.2 * speed, delay: 1.2 * speed, ease: "easeOut" }}
             >
               Originals
             </motion.div>

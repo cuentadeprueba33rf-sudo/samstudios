@@ -33,10 +33,10 @@ export const SamIAProtect: React.FC = () => {
       const rand = Math.random();
       
       if (isRetry) {
-        // If retrying, higher chance of success
-        if (rand < 0.7) {
+        // If retrying, 60% chance of success
+        if (rand < 0.6) {
           handleSuccess();
-        } else if (retryCount < 2) {
+        } else if (retryCount < 3) { // Up to 3 retries now
           setRetryCount(prev => prev + 1);
           simulateConnection(true);
         } else {
@@ -44,26 +44,26 @@ export const SamIAProtect: React.FC = () => {
         }
       } else {
         // Initial connection
-        if (rand < 0.75) {
-          // 75% success first try
+        if (rand < 0.60) {
+          // 60% success first try
           handleSuccess();
           
-          // 15% chance to disconnect later
-          if (Math.random() < 0.15) {
+          // 25% chance to disconnect later (increased probability)
+          if (Math.random() < 0.25) {
             timeoutRef.current = setTimeout(() => {
               handleDisconnect();
-            }, 15000 + Math.random() * 30000); // 15-45s later
+            }, 10000 + Math.random() * 20000); // 10-30s later (happens sooner)
           }
-        } else if (rand < 0.95) {
-          // 20% chance to need a retry
+        } else if (rand < 0.90) {
+          // 30% chance to need a retry
           setRetryCount(1);
           simulateConnection(true);
         } else {
-          // 5% chance to fail completely
+          // 10% chance to fail completely
           handleFailure();
         }
       }
-    }, 2000 + Math.random() * 2000); // 2-4s connection time
+    }, 1500 + Math.random() * 2000); // 1.5-3.5s connection time (slightly faster)
   };
 
   const handleSuccess = () => {
