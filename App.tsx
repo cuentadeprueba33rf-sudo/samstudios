@@ -19,7 +19,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // CONFIG
-const ADMIN_EMAIL = "samuelcasseresbx@gmail.com"; 
+const ADMIN_EMAIL = "cuentadeprueba33rf@gmail.com"; 
 
 // INITIAL DATA - SEED DATA
 const INITIAL_MOVIES: Movie[] = [

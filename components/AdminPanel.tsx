@@ -45,6 +45,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'catalog' | 'requests'>('catalog');
 
@@ -64,6 +65,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
 
   const fetchRequests = async () => {
     setRequestsLoading(true);
+    setRequestsError('');
     try {
       const q = query(collection(db, 'requests'), orderBy('created_at', 'desc'));
       const querySnapshot = await getDocs(q);
@@ -72,8 +74,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
           id: doc.id
       } as Request));
       setRequests(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching requests:", error);
+      setRequestsError(error.message || "Error al cargar las solicitudes");
     } finally {
       setRequestsLoading(false);
     }
@@ -352,6 +355,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
                     <div className="glass-panel p-12 rounded-3xl border border-white/5 text-center">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-500" />
                         <p className="text-gray-500 mt-2">Cargando solicitudes...</p>
+                    </div>
+                ) : requestsError ? (
+                    <div className="glass-panel p-12 rounded-3xl border border-red-500/20 bg-red-500/5 text-center">
+                        <AlertCircle className="h-8 w-8 mx-auto text-red-500 mb-2" />
+                        <p className="text-red-200 font-bold">Error al cargar solicitudes</p>
+                        <p className="text-red-400/60 text-sm mt-1">{requestsError}</p>
+                        <button 
+                            onClick={fetchRequests}
+                            className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition-all"
+                        >
+                            Reintentar
+                        </button>
                     </div>
                 ) : requests.length === 0 ? (
                     <div className="glass-panel p-12 rounded-3xl border border-white/5 text-center text-gray-500">
