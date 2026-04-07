@@ -14,7 +14,7 @@ import { SamIAProtect } from './components/SamIAProtect';
 import { AdminPanel } from './components/AdminPanel';
 import { NotificationCenter } from './components/NotificationCenter';
 import { Movie, ViewState } from './types';
-import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3, LayoutDashboard } from 'lucide-react';
+import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3, LayoutDashboard, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { db, auth } from './services/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -662,6 +662,20 @@ const App = () => {
       />
 
       {isSamProtectEnabled && <SamIAProtect />}
+      
+      {!isSamProtectEnabled && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-fade-in-up pointer-events-none">
+          <div className="bg-red-900/40 backdrop-blur-md border border-red-500/30 rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
+            <div className="bg-red-500/20 p-2 rounded-full shrink-0">
+              <AlertTriangle className="h-5 w-5 text-red-500 animate-pulse" />
+            </div>
+            <div>
+              <h4 className="text-red-500 font-bold text-xs uppercase tracking-wider">Advertencia de Seguridad</h4>
+              <p className="text-red-200/80 text-[10px] sm:text-xs">SAM IA Protect se encuentra desactivado temporalmente.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {movieToRate && (
         <FeedbackModal 
