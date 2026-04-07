@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Bell, User, LogOut, MessageSquarePlus, ShieldCheck, LayoutDashboard } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db, auth } from '../services/firebase';
 
 interface NavbarProps {
   onAddClick: () => void;
@@ -8,6 +10,7 @@ interface NavbarProps {
   onUserClick: () => void;
   onAdminClick?: () => void;
   onRequestClick?: () => void;
+  onNotificationsClick?: () => void;
   searchTerm: string;
   onSearchChange: (val: string) => void;
   isAdmin: boolean;
@@ -21,6 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onUserClick,
   onAdminClick,
   onRequestClick,
+  onNotificationsClick,
   searchTerm, 
   onSearchChange,
   isAdmin,
@@ -28,6 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +41,25 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn || !auth.currentUser) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', auth.currentUser.uid),
+      where('read', '==', false)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [isLoggedIn]);
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'glass-panel shadow-lg' : 'bg-gradient-to-b from-black/90 to-transparent'}`}>
@@ -122,6 +146,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                     )}
                     
+                    {/* Notifications Bell */}
+                    {isLoggedIn && onNotificationsClick && (
+                        <button 
+                            onClick={onNotificationsClick}
+                            className="relative p-2 hover:bg-white/10 rounded-full transition-all text-gray-300 hover:text-white"
+                            title="Notificaciones"
+                        >
+                            <Bell className="h-5 w-5" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-black animate-in zoom-in duration-300">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
+
                     <button 
                       onClick={onUserClick}
                       className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all border font-medium text-xs sm:text-sm uppercase tracking-wider

@@ -12,6 +12,7 @@ import { RequestModal } from './components/RequestModal';
 import { ConstructionNotification } from './components/ConstructionNotification';
 import { SamIAProtect } from './components/SamIAProtect';
 import { AdminPanel } from './components/AdminPanel';
+import { NotificationCenter } from './components/NotificationCenter';
 import { Movie, ViewState } from './types';
 import { Play, Info, Construction, MessageSquarePlus, Database, Loader2, Grid3X3, LayoutDashboard } from 'lucide-react';
 import { db, auth } from './services/firebase';
@@ -554,6 +555,7 @@ const App = () => {
         onUserClick={() => session ? handleLogout() : setCurrentView(ViewState.LOGIN)}
         onAdminClick={() => isAdmin && setCurrentView(ViewState.ADMIN)}
         onRequestClick={() => setCurrentView(ViewState.REQUEST)}
+        onNotificationsClick={() => setCurrentView(ViewState.NOTIFICATIONS)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         isAdmin={isAdmin}
@@ -579,6 +581,12 @@ const App = () => {
         <RequestModal 
             onClose={() => setCurrentView(ViewState.HOME)}
             onLoginClick={() => setCurrentView(ViewState.LOGIN)}
+        />
+      )}
+
+      {currentView === ViewState.NOTIFICATIONS && (
+        <NotificationCenter 
+            onClose={() => setCurrentView(ViewState.HOME)}
         />
       )}
 

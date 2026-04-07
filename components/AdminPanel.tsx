@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Movie } from '../types';
 import { db } from '../services/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, updateDoc, addDoc } from 'firebase/firestore';
 
 interface Request {
     id: string;
@@ -143,9 +143,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
 
   const handleUpdateRequestStatus = async (requestId: string, newStatus: 'completed' | 'rejected') => {
       try {
+          const requestToUpdate = requests.find(r => r.id === requestId);
+          
           await updateDoc(doc(db, 'requests', requestId), {
               status: newStatus
           });
+
+          // Create notification for the user
+          if (requestToUpdate) {
+              const message = newStatus === 'completed' 
+                ? `¡Tu solicitud de "${requestToUpdate.title}" fue aceptada por SAM IA! Ya está disponible en el catálogo.`
+                : `Tu solicitud de "${requestToUpdate.title}" no pudo ser procesada en este momento.`;
+              
+              await addDoc(collection(db, 'notifications'), {
+                  userId: requestToUpdate.userId,
+                  message,
+                  type: newStatus === 'completed' ? 'request_accepted' : 'info',
+                  read: false,
+                  created_at: new Date().toISOString()
+              });
+          }
+
           setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
       } catch (error) {
           console.error("Error updating request:", error);

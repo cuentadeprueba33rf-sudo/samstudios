@@ -41,5 +41,6 @@ export enum ViewState {
   MY_LIST = 'MY_LIST',
   LOGIN = 'LOGIN',
   REQUEST = 'REQUEST',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
+  NOTIFICATIONS = 'NOTIFICATIONS'
 }
