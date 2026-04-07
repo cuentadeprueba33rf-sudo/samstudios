@@ -95,6 +95,14 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
             created_at: new Date().toISOString()
         });
         
+        // Save to local storage for the simulation
+        localStorage.setItem('samstudios_pending_request', JSON.stringify({
+            title,
+            timestamp: Date.now(),
+            status: 'reviewing'
+        }));
+        window.dispatchEvent(new Event('samstudios_request_added'));
+
         setSuccess(true);
         setTimeout(() => {
             onClose();

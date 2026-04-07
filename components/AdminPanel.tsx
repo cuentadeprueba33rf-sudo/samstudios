@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Movie } from '../types';
 import { db } from '../services/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, updateDoc, addDoc, onSnapshot } from 'firebase/firestore';
 
 interface Request {
     id: string;
@@ -48,6 +48,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
   const [requestsError, setRequestsError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'catalog' | 'requests'>('catalog');
+  const [isSamProtectEnabled, setIsSamProtectEnabled] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'security'), (docSnap) => {
+      if (docSnap.exists()) {
+        setIsSamProtectEnabled(docSnap.data().samProtectEnabled !== false);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const toggleSamProtect = async () => {
+    try {
+      await setDoc(doc(db, 'settings', 'security'), {
+        samProtectEnabled: !isSamProtectEnabled
+      }, { merge: true });
+    } catch (e) {
+      console.error("Error toggling SAM Protect:", e);
+    }
+  };
 
   const fetchDbMovies = async () => {
     setLoading(true);
@@ -253,14 +273,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, initialMovies, o
 
           <div className="glass-panel p-6 rounded-2xl border border-white/5">
             <div className="flex items-center justify-between mb-4">
-              <ShieldCheck className="h-8 w-8 text-brand-400" />
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Estado</span>
+              <ShieldCheck className={`h-8 w-8 ${isSamProtectEnabled ? 'text-brand-400' : 'text-red-500'}`} />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Seguridad</span>
             </div>
-            <div className="flex items-center gap-2 text-green-400 font-bold">
-              <CheckCircle2 className="h-5 w-5" />
-              Conectado
+            <div className="flex items-center justify-between">
+                <div className={`flex items-center gap-2 font-bold text-sm ${isSamProtectEnabled ? 'text-green-400' : 'text-red-500'}`}>
+                  {isSamProtectEnabled ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                  {isSamProtectEnabled ? 'SAM IA Activo' : 'SAM IA Inactivo'}
+                </div>
+                <button 
+                    onClick={toggleSamProtect}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${isSamProtectEnabled ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`}
+                >
+                    {isSamProtectEnabled ? 'Desactivar' : 'Activar'}
+                </button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Firebase Firestore</p>
+            <p className="text-xs text-gray-500 mt-2">Control global de protección</p>
           </div>
         </div>
 

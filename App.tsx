@@ -451,6 +451,63 @@ const App = () => {
   const [session, setSession] = useState<any>(null);
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
+  // SAM Protect Global State
+  const [isSamProtectEnabled, setIsSamProtectEnabled] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'security'), (docSnap) => {
+      if (docSnap.exists()) {
+        setIsSamProtectEnabled(docSnap.data().samProtectEnabled !== false);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Pending Request State
+  const [pendingRequest, setPendingRequest] = useState<{title: string, timestamp: number, status: 'reviewing' | 'accepted' | 'rejected'} | null>(() => {
+      if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('samstudios_pending_request');
+          return saved ? JSON.parse(saved) : null;
+      }
+      return null;
+  });
+
+  useEffect(() => {
+      const handleRequestAdded = () => {
+          const saved = localStorage.getItem('samstudios_pending_request');
+          if (saved) setPendingRequest(JSON.parse(saved));
+      };
+      window.addEventListener('samstudios_request_added', handleRequestAdded);
+      return () => window.removeEventListener('samstudios_request_added', handleRequestAdded);
+  }, []);
+
+  useEffect(() => {
+      if (!pendingRequest || pendingRequest.status !== 'reviewing') return;
+
+      const interval = setInterval(() => {
+          const now = Date.now();
+          const elapsed = now - pendingRequest.timestamp;
+          // 2 minutes = 120000 ms
+          if (elapsed > 120000) {
+              // Decide randomly, 80% accept
+              const isAccepted = Math.random() < 0.8;
+              const updatedRequest = {
+                  ...pendingRequest,
+                  status: isAccepted ? 'accepted' : 'rejected' as const
+              };
+              setPendingRequest(updatedRequest);
+              localStorage.setItem('samstudios_pending_request', JSON.stringify(updatedRequest));
+          }
+      }, 10000); // check every 10 seconds
+
+      return () => clearInterval(interval);
+  }, [pendingRequest]);
+
+  const clearPendingRequest = () => {
+      setPendingRequest(null);
+      localStorage.removeItem('samstudios_pending_request');
+  };
+
   // 1. Check Auth on Mount
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -604,7 +661,7 @@ const App = () => {
         isLoggedIn={!!session}
       />
 
-      <SamIAProtect />
+      {isSamProtectEnabled && <SamIAProtect />}
 
       {movieToRate && (
         <FeedbackModal 
@@ -671,6 +728,49 @@ const App = () => {
       {currentView === ViewState.HOME && (
         <>
            <ConstructionNotification onRequestClick={() => setCurrentView(ViewState.REQUEST)} />
+
+           {/* PENDING REQUEST BANNER */}
+           {pendingRequest && (
+               <div className="px-4 md:px-12 mt-4 mb-4 relative z-20 animate-fade-in-up">
+                   <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl ${
+                       pendingRequest.status === 'reviewing' ? 'bg-blue-900/40 border-blue-500/30' :
+                       pendingRequest.status === 'accepted' ? 'bg-green-900/40 border-green-500/30' :
+                       'bg-red-900/40 border-red-500/30'
+                   }`}>
+                       <div className="flex items-center gap-4">
+                           <div className={`p-3 rounded-full ${
+                               pendingRequest.status === 'reviewing' ? 'bg-blue-500/20 text-blue-400 animate-pulse' :
+                               pendingRequest.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                               'bg-red-500/20 text-red-400'
+                           }`}>
+                               {pendingRequest.status === 'reviewing' ? <Loader2 className="h-6 w-6 animate-spin" /> :
+                                pendingRequest.status === 'accepted' ? <CheckCircle2 className="h-6 w-6" /> :
+                                <XCircle className="h-6 w-6" />}
+                           </div>
+                           <div>
+                               <h3 className="font-bold text-lg text-white">
+                                   {pendingRequest.status === 'reviewing' ? 'SAM IA está revisando tu solicitud' :
+                                    pendingRequest.status === 'accepted' ? '¡Solicitud Aceptada por SAM IA!' :
+                                    'Solicitud Rechazada'}
+                               </h3>
+                               <p className="text-sm text-gray-300">
+                                   {pendingRequest.status === 'reviewing' ? `Estamos evaluando agregar "${pendingRequest.title}" al catálogo. Tendrás respuesta en unos minutos.` :
+                                    pendingRequest.status === 'accepted' ? `"${pendingRequest.title}" ha sido aprobada y pronto estará disponible.` :
+                                    `Lo sentimos, no pudimos aprobar "${pendingRequest.title}" en este momento.`}
+                               </p>
+                           </div>
+                       </div>
+                       {pendingRequest.status !== 'reviewing' && (
+                           <button 
+                               onClick={clearPendingRequest}
+                               className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-colors whitespace-nowrap"
+                           >
+                               Entendido
+                           </button>
+                       )}
+                   </div>
+               </div>
+           )}
 
            {!searchTerm && (
              <div className="relative h-[85vh] md:h-[90vh] w-full">
