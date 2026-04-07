@@ -624,25 +624,27 @@ const App = () => {
   }
 
   if (currentView === ViewState.PLAYER && selectedMovie) {
-    return (
-      <Player 
-        movie={selectedMovie}
-        allMovies={movies}
-        onBack={() => {
-          setCurrentView(ViewState.HOME);
-          if (!localFeedback[selectedMovie.id]) {
-            setMovieToRate(selectedMovie);
-          }
-        }}
-        onMovieClick={handleMovieClick}
-        isLiked={likedMovies.includes(selectedMovie.id)}
-        isInMyList={myList.includes(selectedMovie.id)}
-        onToggleLike={() => toggleLike(selectedMovie.id)}
-        onToggleMyList={() => toggleMyList(selectedMovie.id)}
-        isAdmin={isAdmin}
-        onEdit={handleEditMovie}
-      />
-    );
+    if (isSamProtectEnabled || isAdmin) {
+      return (
+        <Player 
+          movie={selectedMovie}
+          allMovies={movies}
+          onBack={() => {
+            setCurrentView(ViewState.HOME);
+            if (!localFeedback[selectedMovie.id]) {
+              setMovieToRate(selectedMovie);
+            }
+          }}
+          onMovieClick={handleMovieClick}
+          isLiked={likedMovies.includes(selectedMovie.id)}
+          isInMyList={myList.includes(selectedMovie.id)}
+          onToggleLike={() => toggleLike(selectedMovie.id)}
+          onToggleMyList={() => toggleMyList(selectedMovie.id)}
+          isAdmin={isAdmin}
+          onEdit={handleEditMovie}
+        />
+      );
+    }
   }
 
   return (
@@ -663,7 +665,7 @@ const App = () => {
 
       {isSamProtectEnabled && <SamIAProtect />}
       
-      {!isSamProtectEnabled && (
+      {!isSamProtectEnabled && isAdmin && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-fade-in-up pointer-events-none">
           <div className="bg-red-900/40 backdrop-blur-md border border-red-500/30 rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
             <div className="bg-red-500/20 p-2 rounded-full shrink-0">
@@ -671,26 +673,10 @@ const App = () => {
             </div>
             <div>
               <h4 className="text-red-500 font-bold text-xs uppercase tracking-wider">Advertencia de Seguridad</h4>
-              <p className="text-red-200/80 text-[10px] sm:text-xs">SAM IA Protect se encuentra desactivado temporalmente.</p>
+              <p className="text-red-200/80 text-[10px] sm:text-xs">SAM IA Protect desactivado. Los usuarios ven la página caída.</p>
             </div>
           </div>
         </div>
-      )}
-
-      {movieToRate && (
-        <FeedbackModal 
-          movie={movieToRate}
-          onClose={() => setMovieToRate(null)}
-          onSubmit={handleSaveFeedback}
-        />
-      )}
-
-      {currentView === ViewState.ADMIN && isAdmin && (
-        <AdminPanel 
-          onBack={() => setCurrentView(ViewState.HOME)} 
-          initialMovies={INITIAL_MOVIES}
-          onSyncComplete={fetchMovies}
-        />
       )}
 
       {currentView === ViewState.LOGIN && (
@@ -700,7 +686,41 @@ const App = () => {
         />
       )}
 
-      {currentView === ViewState.REQUEST && (
+      {!isSamProtectEnabled && !isAdmin ? (
+        <div className="fixed inset-0 z-40 bg-[#050505] flex flex-col items-center justify-center p-4 text-center pt-20">
+           <AlertTriangle className="h-24 w-24 text-red-600 mb-8 animate-pulse" />
+           <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter">503 SERVICE UNAVAILABLE</h1>
+           <p className="text-red-500 font-mono text-sm md:text-base max-w-lg mb-8">
+             [FATAL ERROR]: SAM IA Protect subsystem is offline. 
+             Access to the catalog and streaming servers has been halted to prevent unauthorized breaches.
+           </p>
+           <div className="p-6 border border-red-900/50 bg-red-900/10 rounded-lg font-mono text-xs md:text-sm text-red-400/70 text-left w-full max-w-2xl shadow-[0_0_30px_rgba(239,68,68,0.1)]">
+              <p>{">"} Initializing secure connection... <span className="text-red-500">FAILED</span></p>
+              <p>{">"} Ping media servers... <span className="text-red-500">TIMEOUT</span></p>
+              <p>{">"} Fetching catalog data... <span className="text-red-500">BLOCKED BY FIREWALL</span></p>
+              <p>{">"} Verifying security tokens... <span className="text-red-500">NULL</span></p>
+              <p className="animate-pulse mt-4 text-red-500 font-bold">_ System locked. Please contact administrator.</p>
+           </div>
+        </div>
+      ) : (
+        <>
+          {movieToRate && (
+            <FeedbackModal 
+              movie={movieToRate}
+              onClose={() => setMovieToRate(null)}
+              onSubmit={handleSaveFeedback}
+            />
+          )}
+
+          {currentView === ViewState.ADMIN && isAdmin && (
+            <AdminPanel 
+              onBack={() => setCurrentView(ViewState.HOME)} 
+              initialMovies={INITIAL_MOVIES}
+              onSyncComplete={fetchMovies}
+            />
+          )}
+
+          {currentView === ViewState.REQUEST && (
         <RequestModal 
             onClose={() => setCurrentView(ViewState.HOME)}
             onLoginClick={() => setCurrentView(ViewState.LOGIN)}
@@ -872,6 +892,8 @@ const App = () => {
               </div>
            </div>
         </>
+      )}
+      </>
       )}
     </div>
   );
