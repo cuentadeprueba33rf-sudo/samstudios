@@ -19,8 +19,10 @@ import { db, auth } from './services/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
+import { FeedbackModal } from './components/FeedbackModal';
+
 // CONFIG
-const ADMIN_EMAIL = "cuentadeprueba33rf@gmail.com"; 
+const ADMIN_EMAIL = "cuentadeprueba33rf@gmail.com";  
 
 // INITIAL DATA - SEED DATA
 const INITIAL_MOVIES: Movie[] = [
@@ -387,6 +389,7 @@ const App = () => {
 
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [movieToRate, setMovieToRate] = useState<Movie | null>(null);
   
   // State for Movies
   const [movies, setMovies] = useState<Movie[]>(INITIAL_MOVIES);
@@ -396,7 +399,23 @@ const App = () => {
   const [likedMovies, setLikedMovies] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Local Feedback State
+  const [localFeedback, setLocalFeedback] = useState<Record<string, any>>(() => {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('samstudios_feedback_v1');
+        return saved ? JSON.parse(saved) : {};
+    }
+    return {};
+  });
+
+  const handleSaveFeedback = (feedback: any) => {
+    const newFeedback = { ...localFeedback, [feedback.movieId]: feedback };
+    setLocalFeedback(newFeedback);
+    localStorage.setItem('samstudios_feedback_v1', JSON.stringify(newFeedback));
+  };
+
   // Auth State
+
   const [session, setSession] = useState<any>(null);
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
@@ -520,7 +539,12 @@ const App = () => {
       <Player 
         movie={selectedMovie}
         allMovies={movies}
-        onBack={() => setCurrentView(ViewState.HOME)}
+        onBack={() => {
+          setCurrentView(ViewState.HOME);
+          if (!localFeedback[selectedMovie.id]) {
+            setMovieToRate(selectedMovie);
+          }
+        }}
         onMovieClick={handleMovieClick}
         isLiked={likedMovies.includes(selectedMovie.id)}
         isInMyList={myList.includes(selectedMovie.id)}
@@ -549,6 +573,14 @@ const App = () => {
       />
 
       <SamIAProtect />
+
+      {movieToRate && (
+        <FeedbackModal 
+          movie={movieToRate}
+          onClose={() => setMovieToRate(null)}
+          onSubmit={handleSaveFeedback}
+        />
+      )}
 
       {currentView === ViewState.ADMIN && isAdmin && (
         <AdminPanel 
