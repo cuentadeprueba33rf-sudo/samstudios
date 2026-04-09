@@ -85,7 +85,7 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
 
     setLoading(true);
     try {
-        await addDoc(collection(db, 'requests'), {
+        const docRef = await addDoc(collection(db, 'requests'), {
             title,
             type,
             note,
@@ -95,8 +95,9 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
             created_at: new Date().toISOString()
         });
         
-        // Save to local storage for the simulation
+        // Save to local storage for tracking real status
         localStorage.setItem('samstudios_pending_request', JSON.stringify({
+            id: docRef.id,
             title,
             timestamp: Date.now(),
             status: 'reviewing'

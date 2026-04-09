@@ -464,7 +464,7 @@ const App = () => {
   }, []);
 
   // Pending Request State
-  const [pendingRequest, setPendingRequest] = useState<{title: string, timestamp: number, status: 'reviewing' | 'accepted' | 'rejected'} | null>(() => {
+  const [pendingRequest, setPendingRequest] = useState<{id?: string, title: string, timestamp: number, status: 'reviewing' | 'accepted' | 'rejected'} | null>(() => {
       if (typeof window !== 'undefined') {
           const saved = localStorage.getItem('samstudios_pending_request');
           return saved ? JSON.parse(saved) : null;
@@ -484,24 +484,46 @@ const App = () => {
   useEffect(() => {
       if (!pendingRequest || pendingRequest.status !== 'reviewing') return;
 
-      const interval = setInterval(() => {
-          const now = Date.now();
-          const elapsed = now - pendingRequest.timestamp;
-          // 2 minutes = 120000 ms
-          if (elapsed > 120000) {
-              // Decide randomly, 80% accept
-              const isAccepted = Math.random() < 0.8;
-              const updatedRequest = {
-                  ...pendingRequest,
-                  status: isAccepted ? 'accepted' : 'rejected' as const
-              };
-              setPendingRequest(updatedRequest);
-              localStorage.setItem('samstudios_pending_request', JSON.stringify(updatedRequest));
-          }
-      }, 10000); // check every 10 seconds
+      if (!pendingRequest.id) {
+          // Fallback for old requests without ID
+          const interval = setInterval(() => {
+              const now = Date.now();
+              const elapsed = now - pendingRequest.timestamp;
+              if (elapsed > 120000) {
+                  const isAccepted = Math.random() < 0.8;
+                  const updatedRequest = {
+                      ...pendingRequest,
+                      status: isAccepted ? 'accepted' as const : 'rejected' as const
+                  };
+                  setPendingRequest(updatedRequest);
+                  localStorage.setItem('samstudios_pending_request', JSON.stringify(updatedRequest));
+              }
+          }, 10000);
+          return () => clearInterval(interval);
+      }
 
-      return () => clearInterval(interval);
-  }, [pendingRequest]);
+      // Listen to real status from Firestore
+      const unsub = onSnapshot(doc(db, 'requests', pendingRequest.id), (docSnap) => {
+          if (docSnap.exists()) {
+              const data = docSnap.data();
+              if (data.status === 'completed' || data.status === 'rejected') {
+                  const updatedRequest = {
+                      ...pendingRequest,
+                      status: data.status === 'completed' ? 'accepted' as const : 'rejected' as const
+                  };
+                  setPendingRequest(updatedRequest);
+                  localStorage.setItem('samstudios_pending_request', JSON.stringify(updatedRequest));
+              }
+          } else {
+              // If the request was deleted by admin
+              clearPendingRequest();
+          }
+      }, (error) => {
+          console.error("Error listening to request status:", error);
+      });
+
+      return () => unsub();
+  }, [pendingRequest?.id, pendingRequest?.status]);
 
   const clearPendingRequest = () => {
       setPendingRequest(null);
@@ -788,7 +810,7 @@ const App = () => {
                                     'Solicitud Rechazada'}
                                </h3>
                                <p className="text-sm text-gray-300">
-                                   {pendingRequest.status === 'reviewing' ? `Estamos evaluando agregar "${pendingRequest.title}" al catálogo. Tendrás respuesta en unos minutos.` :
+                                   {pendingRequest.status === 'reviewing' ? `Estamos evaluando agregar "${pendingRequest.title}" al catálogo. Tendrás respuesta cuando sea revisada.` :
                                     pendingRequest.status === 'accepted' ? `"${pendingRequest.title}" ha sido aprobada y pronto estará disponible.` :
                                     `Lo sentimos, no pudimos aprobar "${pendingRequest.title}" en este momento.`}
                                </p>
