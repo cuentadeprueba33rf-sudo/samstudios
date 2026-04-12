@@ -102,35 +102,35 @@ export const SamIAProtect: React.FC = () => {
   const getIcon = () => {
     switch (status) {
       case 'connecting':
-        return <ShieldCheck className="text-brand-400 h-5 w-5 animate-pulse" />;
+        return <ShieldCheck className="text-primary h-5 w-5 animate-pulse" />;
       case 'connected':
-        return <ShieldCheck className={`text-brand-400 transition-all duration-500 ${isMinimized ? 'h-4 w-4' : 'h-5 w-5'}`} />;
+        return <ShieldCheck className={`text-primary transition-all duration-500 ${isMinimized ? 'h-4 w-4' : 'h-5 w-5'}`} />;
       case 'retrying':
-        return <RefreshCw className="text-yellow-500 h-5 w-5 animate-spin" />;
+        return <RefreshCw className="text-secondary h-5 w-5 animate-spin" />;
       case 'disconnected':
-        return <WifiOff className="text-orange-500 h-5 w-5 animate-pulse" />;
+        return <WifiOff className="text-error h-5 w-5 animate-pulse" />;
       case 'failed':
-        return <XCircle className="text-red-500 h-5 w-5" />;
+        return <XCircle className="text-error h-5 w-5" />;
     }
   };
 
   const getBorderColor = () => {
     switch (status) {
-      case 'connecting': return 'border-brand-500/30';
-      case 'connected': return 'border-brand-500/30';
-      case 'retrying': return 'border-yellow-500/30';
-      case 'disconnected': return 'border-orange-500/30';
-      case 'failed': return 'border-red-500/30';
+      case 'connecting': return 'border-primary/30';
+      case 'connected': return 'border-primary/30';
+      case 'retrying': return 'border-secondary/30';
+      case 'disconnected': return 'border-error/30';
+      case 'failed': return 'border-error/30';
     }
   };
 
   const getShadowColor = () => {
     switch (status) {
-      case 'connecting': return 'shadow-[0_0_30px_rgba(59,130,246,0.15)]';
-      case 'connected': return 'shadow-[0_0_30px_rgba(59,130,246,0.15)]';
-      case 'retrying': return 'shadow-[0_0_30px_rgba(234,179,8,0.15)]';
-      case 'disconnected': return 'shadow-[0_0_30px_rgba(249,115,22,0.15)]';
-      case 'failed': return 'shadow-[0_0_30px_rgba(239,68,68,0.15)]';
+      case 'connecting': return 'shadow-[0_0_30px_rgba(182,160,255,0.15)]';
+      case 'connected': return 'shadow-[0_0_30px_rgba(182,160,255,0.15)]';
+      case 'retrying': return 'shadow-[0_0_30px_rgba(0,175,254,0.15)]';
+      case 'disconnected': return 'shadow-[0_0_30px_rgba(255,110,132,0.15)]';
+      case 'failed': return 'shadow-[0_0_30px_rgba(255,110,132,0.15)]';
     }
   };
 
@@ -141,17 +141,17 @@ export const SamIAProtect: React.FC = () => {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none"
+          className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] pointer-events-none"
         >
           <motion.div 
             animate={{ 
               width: isMinimized ? 'auto' : 'fit-content',
               padding: isMinimized ? '8px 12px' : '12px 24px'
             }}
-            className={`bg-black/80 backdrop-blur-xl border ${getBorderColor()} rounded-full ${getShadowColor()} flex items-center gap-3 pointer-events-auto transition-colors duration-500`}
+            className={`bg-surface/80 backdrop-blur-xl border ${getBorderColor()} rounded-full ${getShadowColor()} flex items-center gap-3 pointer-events-auto transition-colors duration-500`}
           >
             <div className="relative">
-              {status === 'connected' && !isMinimized && <div className="absolute inset-0 bg-brand-500/20 rounded-full blur-md animate-pulse" />}
+              {status === 'connected' && !isMinimized && <div className="absolute inset-0 bg-primary/20 rounded-full blur-md animate-pulse" />}
               {getIcon()}
             </div>
 
@@ -165,21 +165,21 @@ export const SamIAProtect: React.FC = () => {
                   className="flex flex-col"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-white tracking-widest uppercase italic">
-                      SAM <span className="text-brand-500">IA</span> PROTECT
+                    <span className="text-[10px] font-headline font-black text-on-surface tracking-widest uppercase italic">
+                      AETHER <span className="text-primary">PROTECT</span>
                     </span>
-                    {status === 'connected' && <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />}
-                    {status === 'connecting' && <div className="h-1 w-1 rounded-full bg-brand-500 animate-pulse" />}
-                    {status === 'retrying' && <div className="h-1 w-1 rounded-full bg-yellow-500 animate-pulse" />}
-                    {status === 'disconnected' && <div className="h-1 w-1 rounded-full bg-orange-500 animate-pulse" />}
-                    {status === 'failed' && <div className="h-1 w-1 rounded-full bg-red-500" />}
+                    {status === 'connected' && <div className="h-1 w-1 rounded-full bg-secondary animate-pulse" />}
+                    {status === 'connecting' && <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />}
+                    {status === 'retrying' && <div className="h-1 w-1 rounded-full bg-secondary animate-pulse" />}
+                    {status === 'disconnected' && <div className="h-1 w-1 rounded-full bg-error animate-pulse" />}
+                    {status === 'failed' && <div className="h-1 w-1 rounded-full bg-error" />}
                   </div>
                   
-                  <p className={`text-[9px] uppercase tracking-tighter font-medium ${
-                    status === 'failed' ? 'text-red-400' : 
-                    status === 'disconnected' ? 'text-orange-400' :
-                    status === 'retrying' ? 'text-yellow-400' :
-                    'text-gray-400'
+                  <p className={`text-[9px] uppercase tracking-tighter font-label font-medium ${
+                    status === 'failed' ? 'text-error' : 
+                    status === 'disconnected' ? 'text-error' :
+                    status === 'retrying' ? 'text-secondary' :
+                    'text-on-surface-variant'
                   }`}>
                     {status === 'connecting' && 'Estableciendo conexión segura...'}
                     {status === 'connected' && 'Autenticación y protección activada'}
@@ -195,18 +195,18 @@ export const SamIAProtect: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex items-center gap-2"
                 >
-                  <span className="text-[9px] font-bold text-brand-400 uppercase tracking-widest">
-                    Protección Activa
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-widest font-label">
+                    AETHER ACTIVA
                   </span>
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  <CheckCircle2 className="h-3 w-3 text-secondary" />
                 </motion.div>
               )}
             </AnimatePresence>
 
             {!isMinimized && status === 'connected' && (
-              <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/10">
-                <Lock className="h-3 w-3 text-gray-500" />
-                <Zap className="h-3 w-3 text-gray-500" />
+              <div className="flex items-center gap-2 ml-2 pl-4 border-l border-outline/20">
+                <Lock className="h-3 w-3 text-on-surface-variant" />
+                <Zap className="h-3 w-3 text-on-surface-variant" />
               </div>
             )}
           </motion.div>

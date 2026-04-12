@@ -32,26 +32,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-surface/90 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative bg-[#0f1014] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl p-8 animate-fade-in">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+      <div className="relative bg-surface border border-outline/10 rounded-2xl w-full max-w-md shadow-2xl p-8 animate-fade-in">
+        <button onClick={onClose} className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
             <X className="h-6 w-6" />
         </button>
 
         <div className="flex flex-col items-center mb-6">
-            <div className="p-3 bg-brand-900 rounded-full mb-3 border border-brand-500/20">
-                <Lock className="h-6 w-6 text-brand-500" />
+            <div className="p-3 bg-primary/10 rounded-full mb-3 border border-primary/20">
+                <Lock className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Acceso Admin</h2>
-            <p className="text-sm text-gray-400 mt-1 text-center">
+            <h2 className="text-2xl font-headline font-black text-on-surface uppercase tracking-tight">Acceso Admin</h2>
+            <p className="text-sm text-on-surface-variant mt-1 text-center font-label">
                 Inicia sesión con tu cuenta de Google para gestionar el contenido.
             </p>
         </div>
 
         <div className="space-y-4">
             {error && (
-                <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-200 text-sm">
+                <div className="p-3 bg-error-container/20 border border-error/30 rounded-lg flex items-center gap-2 text-error text-sm font-label uppercase font-bold">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {error}
                 </div>
@@ -60,9 +60,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess 
             <button 
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-3"
+                className="w-full bg-on-surface hover:bg-on-surface/90 text-surface font-headline font-black py-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest"
             >
-                {loading ? <Loader2 className="animate-spin h-5 w-5 text-black" /> : (
+                {loading ? <Loader2 className="animate-spin h-5 w-5 text-surface" /> : (
                     <>
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

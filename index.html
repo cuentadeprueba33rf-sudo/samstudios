@@ -4,23 +4,84 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SamStudios</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>AETHER | Cinematic Experience</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
       tailwind.config = {
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
+              "on-surface": "#ffffff",
+              "primary-container": "#a98fff",
+              "on-tertiary-fixed": "#2f0039",
+              "primary-fixed-dim": "#9c7eff",
+              "secondary": "#00affe",
+              "on-primary-fixed": "#000000",
+              "on-tertiary": "#3c0048",
+              "surface-dim": "#0e0e0e",
+              "on-secondary": "#002a42",
+              "error-container": "#a70138",
+              "on-primary": "#340090",
+              "background": "#0e0e0e",
+              "tertiary-dim": "#c500e6",
+              "error": "#ff6e84",
+              "inverse-primary": "#6834eb",
+              "tertiary-fixed": "#f189ff",
+              "error-dim": "#d73357",
+              "secondary-dim": "#00a7f2",
+              "on-primary-container": "#280072",
+              "tertiary-fixed-dim": "#eb71ff",
+              "on-secondary-container": "#f3f8ff",
+              "surface-container": "#1a1919",
+              "primary-fixed": "#a98fff",
+              "on-secondary-fixed": "#003855",
+              "surface-container-low": "#131313",
+              "inverse-surface": "#fcf8f8",
+              "tertiary-container": "#d501f9",
+              "secondary-container": "#006493",
+              "outline-variant": "#494847",
+              "tertiary": "#e966ff",
+              "outline": "#777575",
+              "surface-variant": "#262626",
+              "surface-container-high": "#201f1f",
+              "primary": "#b6a0ff",
+              "on-tertiary-container": "#000000",
+              "on-background": "#ffffff",
+              "surface": "#0e0e0e",
+              "on-error": "#490013",
+              "secondary-fixed-dim": "#86cbff",
+              "surface-container-highest": "#262626",
+              "primary-dim": "#7e51ff",
+              "on-surface-variant": "#adaaaa",
+              "inverse-on-surface": "#565554",
+              "on-error-container": "#ffb2b9",
+              "surface-container-lowest": "#000000",
+              "on-secondary-fixed-variant": "#00567f",
+              "surface-tint": "#b6a0ff",
+              "on-primary-fixed-variant": "#32008a",
+              "secondary-fixed": "#a7d7ff",
+              "surface-bright": "#2c2c2c",
+              "on-tertiary-fixed-variant": "#650077",
               brand: {
                 900: '#0a0a0a',
                 800: '#141414',
-                500: '#ffffff', // White accent for a premium look
+                500: '#b6a0ff',
                 accent: '#f5f5f5'
               }
             },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
             fontFamily: {
+              headline: ["Manrope"],
+              body: ["Inter"],
+              label: ["Inter"],
               sans: ['Inter', 'system-ui', 'sans-serif'],
-              display: ['Montserrat', 'system-ui', 'sans-serif'],
+              display: ['Manrope', 'system-ui', 'sans-serif'],
             },
             animation: {
                'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -41,17 +102,34 @@
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Montserrat:wght@300;400;500;700;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;900&display=swap');
+      
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #000000; /* Pure black */
+        background-color: #0e0e0e;
         color: #ffffff;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        min-height: max(884px, 100dvh);
       }
       
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Montserrat', sans-serif;
+        font-family: 'Manrope', sans-serif;
+      }
+
+      .glass-panel {
+        background: rgba(38, 38, 38, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hero-gradient {
+        background: linear-gradient(to top, #0e0e0e 0%, rgba(14, 14, 14, 0.4) 40%, transparent 100%);
+      }
+
+      .text-glow {
+        text-shadow: 0 0 20px rgba(182, 160, 255, 0.4);
       }
 
       /* Custom scrollbar */
@@ -60,21 +138,21 @@
         height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #000000; 
+        background: #0e0e0e; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #333333; 
+        background: #262626; 
         border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #555555; 
+        background: #333333; 
       }
 
       /* Hide Scrollbar Utility */
-      .hide-scrollbar::-webkit-scrollbar {
+      .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
-      .hide-scrollbar {
+      .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
@@ -82,20 +160,6 @@
       /* Smooth image loading */
       img {
         transition: opacity 0.5s ease-in-out;
-      }
-      
-      /* Gradient mask for images */
-      .mask-image-gradient {
-          mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-      }
-      
-      /* Premium glass effect */
-      .glass-panel {
-        background: rgba(25, 25, 25, 0.6);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
       }
     </style>
 <script type="importmap">

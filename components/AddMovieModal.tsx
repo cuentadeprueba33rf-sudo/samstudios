@@ -151,17 +151,17 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative bg-[#111218] rounded-3xl w-full max-w-lg border border-white/10 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-fade-in">
+      <div className="relative bg-surface rounded-3xl w-full max-w-lg border border-outline/10 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-fade-in">
         
-        <div className="h-1 w-full bg-white/5 shrink-0">
-            <div className={`h-full bg-brand-500 transition-all duration-700 ${title ? 'w-1/2' : 'w-4'} ${streamUrl ? 'w-full' : ''}`} />
+        <div className="h-1 w-full bg-surface-variant shrink-0">
+            <div className={`h-full bg-primary transition-all duration-700 ${title ? 'w-1/2' : 'w-4'} ${streamUrl ? 'w-full' : ''}`} />
         </div>
 
-        <div className="p-6 border-b border-white/5 flex justify-between items-center shrink-0">
-          <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase italic">
+        <div className="p-6 border-b border-outline/10 flex justify-between items-center shrink-0">
+          <h2 className="text-xl font-headline font-black text-on-surface flex items-center gap-2 uppercase italic">
             {movieToEdit ? 'Editar Contenido' : 'Añadir a la Red'}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white">
+          <button onClick={onClose} className="p-2 hover:bg-surface-variant rounded-full transition-colors text-on-surface-variant hover:text-on-surface">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -170,141 +170,141 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
             
           <div className="space-y-5">
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Nombre del Contenido</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Nombre del Contenido</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:border-brand-500 outline-none transition-all font-bold text-lg"
+                  className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-4 text-on-surface focus:border-primary outline-none transition-all font-headline font-bold text-lg"
                   placeholder="Ej: El Juego del Calamar 2"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Enlace (TeraBox / URL)</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Enlace (TeraBox / URL)</label>
                 <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <LinkIcon className="absolute left-4 top-4 h-5 w-5 text-gray-500" />
+                      <LinkIcon className="absolute left-4 top-4 h-5 w-5 text-on-surface-variant" />
                       <input
                         type="text"
                         value={streamUrl}
                         onChange={(e) => setStreamUrl(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white focus:border-brand-500 outline-none transition-all text-xs font-mono"
+                        className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl pl-12 pr-4 py-4 text-on-surface focus:border-primary outline-none transition-all text-xs font-mono"
                         placeholder="Pega aquí el link..."
                       />
                     </div>
                     {streamUrl && (
-                        <button 
-                            onClick={resolveLink}
-                            disabled={resolving}
-                            className="bg-brand-500 hover:bg-red-600 text-white px-5 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
-                        >
-                            {resolving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
-                        </button>
+                      <button 
+                        onClick={resolveLink}
+                        disabled={resolving}
+                        className="bg-primary hover:bg-primary/80 text-on-primary px-5 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                      >
+                        {resolving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                      </button>
                     )}
                 </div>
               </div>
 
               {/* MODO REPRODUCTOR */}
-              <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${isDirectLink ? 'bg-brand-500/10 border-brand-500/30' : 'bg-white/5 border-white/5'}`}>
+              <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${isDirectLink ? 'bg-primary/10 border-primary/30' : 'bg-surface-variant/50 border-outline/10'}`}>
                   <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-xl ${isDirectLink ? 'bg-brand-500 text-white shadow-lg' : 'bg-gray-800 text-gray-500'}`}>
+                      <div className={`p-3 rounded-xl ${isDirectLink ? 'bg-primary text-on-primary shadow-lg' : 'bg-surface-variant text-on-surface-variant'}`}>
                         <MonitorPlay className="h-6 w-6" />
                       </div>
                       <div>
-                        <span className="block text-xs font-black text-white uppercase italic">Modo SamPlayer Pro</span>
-                        <span className="block text-[10px] text-gray-500 font-bold uppercase">{isDirectLink ? 'Video Nativo (MP4/M3U8)' : 'Reproductor Externo (Embed)'}</span>
+                        <span className="block text-xs font-headline font-black text-on-surface uppercase italic">Modo AETHER Player</span>
+                        <span className="block text-[10px] text-on-surface-variant font-label font-bold uppercase">{isDirectLink ? 'Video Nativo (MP4/M3U8)' : 'Reproductor Externo (Embed)'}</span>
                       </div>
                   </div>
                   <button 
                     onClick={() => setIsDirectLink(!isDirectLink)}
-                    className={`w-14 h-7 rounded-full p-1 transition-colors ${isDirectLink ? 'bg-brand-500' : 'bg-gray-700'}`}
+                    className={`w-14 h-7 rounded-full p-1 transition-colors ${isDirectLink ? 'bg-primary' : 'bg-surface-variant'}`}
                   >
                     <div className={`w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform ${isDirectLink ? 'translate-x-7' : ''}`} />
                   </button>
               </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
+          <div className="space-y-4 pt-4 border-t border-outline/10 animate-fade-in">
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">URL del Póster</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">URL del Póster</label>
                 <input
                     type="text"
                     value={posterUrl}
                     onChange={(e) => setPosterUrl(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface text-sm outline-none focus:border-primary transition-colors"
                     placeholder="https://..."
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Sinopsis (Descripción Completa)</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Sinopsis (Descripción Completa)</label>
                 <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[100px] focus:border-brand-500 transition-colors"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface text-sm outline-none min-h-[100px] focus:border-primary transition-colors"
                     placeholder="Escribe la sinopsis detallada aquí..."
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Fragmento / Resumen Corto (Opcional)</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Fragmento / Resumen Corto (Opcional)</label>
                 <textarea
                     value={snippet}
                     onChange={(e) => setSnippet(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none min-h-[60px] focus:border-brand-500 transition-colors"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface text-sm outline-none min-h-[60px] focus:border-primary transition-colors"
                     placeholder="Un breve resumen de 1 o 2 líneas..."
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Géneros</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Géneros</label>
                 <input
                     type="text"
                     value={genre}
                     onChange={(e) => setGenre(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface text-sm outline-none focus:border-primary transition-colors"
                     placeholder="Acción, Comedia, Drama..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Año</label>
-                    <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand-500 transition-colors" placeholder="Ej: 2024" />
+                    <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Año</label>
+                    <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface outline-none focus:border-primary transition-colors" placeholder="Ej: 2024" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Calificación</label>
-                    <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand-500 transition-colors" placeholder="Ej: 8.5" />
+                    <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Calificación</label>
+                    <input type="number" step="0.1" value={rating} onChange={(e) => setRating(e.target.value)} className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface outline-none focus:border-primary transition-colors" placeholder="Ej: 8.5" />
                   </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-500 mb-2 uppercase tracking-widest">Posición en el Ranking (Top 10)</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Posición en el Ranking (Top 10)</label>
                 <input
                     type="number"
                     value={trendingRank}
                     onChange={(e) => setTrendingRank(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-brand-500 transition-colors"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-xl px-4 py-3 text-on-surface text-sm outline-none focus:border-primary transition-colors"
                     placeholder="Ej: 1 (Opcional)"
                 />
               </div>
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
-                <p className="text-red-400 text-[10px] font-bold uppercase leading-tight">{error}</p>
+            <div className="bg-error-container/20 border border-error/30 p-4 rounded-xl flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-error shrink-0" />
+                <p className="text-error text-[10px] font-bold uppercase leading-tight">{error}</p>
             </div>
           )}
           
-          {status && <p className="text-brand-500 text-[10px] font-black animate-pulse text-center uppercase tracking-widest">{status}</p>}
+          {status && <p className="text-primary text-[10px] font-black animate-pulse text-center uppercase tracking-widest">{status}</p>}
 
           <div className="flex gap-3 pt-4 shrink-0 pb-2">
             <button
                 onClick={handleSave}
                 disabled={!title || !streamUrl || loading || deleteLoading}
-                className="flex-1 py-5 rounded-2xl font-black text-white shadow-xl bg-gradient-to-r from-brand-500 to-red-800 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 uppercase tracking-widest italic text-sm"
+                className="flex-1 py-5 rounded-2xl font-headline font-black text-on-primary shadow-xl bg-gradient-to-r from-primary to-secondary hover:brightness-110 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 uppercase tracking-widest italic text-sm"
             >
                 {loading ? <Loader2 className="animate-spin h-6 w-6" /> : (movieToEdit ? 'Guardar Cambios' : 'Publicar Ahora')}
             </button>
@@ -312,7 +312,7 @@ export const AddMovieModal: React.FC<AddMovieModalProps> = ({ onClose, onAdd, on
             {movieToEdit && (
                 <button
                     onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
-                    className={`px-6 rounded-2xl font-bold transition-all border ${showDeleteConfirm ? 'bg-red-600 border-red-600 text-white animate-pulse' : 'bg-white/5 text-red-500 border-red-500/20'}`}
+                    className={`px-6 rounded-2xl font-bold transition-all border ${showDeleteConfirm ? 'bg-error border-error text-on-error animate-pulse' : 'bg-surface-variant/50 text-error border-error/20'}`}
                 >
                     <Trash2 className="h-6 w-6" />
                 </button>

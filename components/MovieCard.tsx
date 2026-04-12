@@ -15,7 +15,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
       onClick={() => onClick(movie)}
     >
       {/* Image Container - Aspect ratio locked */}
-      <div className="relative aspect-[2/3] w-full rounded-sm md:rounded-md overflow-hidden bg-gray-900 transition-all duration-300 ease-out group-hover:scale-105 group-hover:z-10 group-hover:shadow-lg ring-0 group-hover:ring-1 group-hover:ring-white/30">
+      <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-variant transition-all duration-500 ease-out group-hover:scale-105 group-hover:z-10 group-hover:shadow-[0_0_40px_rgba(182,160,255,0.2)] ring-0 group-hover:ring-1 group-hover:ring-primary/30">
         <img 
           src={movie.posterUrl} 
           alt={movie.title}
@@ -24,16 +24,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
         />
         
         {/* Hover Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 sm:p-3">
-            <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                 <div className="flex items-center gap-1.5 mb-1">
-                    <div className="bg-white rounded-full p-0.5 md:p-1 shadow-sm">
-                        <Play className="h-1.5 w-1.5 md:h-3 md:w-3 text-black fill-black" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 sm:p-4">
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                 <div className="flex items-center gap-2 mb-2">
+                    <div className="bg-primary rounded-full p-1 shadow-lg">
+                        <Play className="h-2 w-2 md:h-3 md:w-3 text-on-primary fill-on-primary" />
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-bold text-green-400">{movie.rating.toFixed(1)}</span>
+                    <span className="text-[10px] md:text-xs font-bold text-secondary">{movie.rating.toFixed(1)}</span>
                  </div>
-                 <h3 className="text-white font-bold text-[8px] md:text-xs leading-tight drop-shadow-md line-clamp-2 hidden md:block">{movie.title}</h3>
-                 <p className="text-gray-300 text-[8px] md:text-[9px] mt-0.5 line-clamp-1 hidden md:block">{movie.genre.slice(0, 1).join(' • ')}</p>
+                 <h3 className="text-on-surface font-headline font-bold text-[10px] md:text-sm leading-tight drop-shadow-md line-clamp-2 hidden md:block">{movie.title}</h3>
+                 <p className="text-on-surface-variant text-[9px] md:text-[10px] mt-1 line-clamp-1 hidden md:block font-label uppercase tracking-wider">{movie.genre.slice(0, 1).join(' • ')}</p>
             </div>
         </div>
       </div>
@@ -48,10 +48,10 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
                textAnchor="end"
                fontSize="120" 
                fontWeight="900" 
-               fill="#000000" 
-               stroke="#333333" 
+               fill="#0e0e0e" 
+               stroke="#262626" 
                strokeWidth="3"
-               style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-5px' }}
+               style={{ fontFamily: 'Manrope, sans-serif', letterSpacing: '-5px' }}
              >
                {rank}
              </text>
@@ -62,9 +62,9 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, rank }) =>
                fontSize="120" 
                fontWeight="900" 
                fill="none" 
-               stroke="#ffffff" 
+               stroke="#b6a0ff" 
                strokeWidth="1.5"
-               style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-5px' }}
+               style={{ fontFamily: 'Manrope, sans-serif', letterSpacing: '-5px' }}
              >
                {rank}
              </text>

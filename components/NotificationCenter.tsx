@@ -82,17 +82,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-end p-4 sm:p-6 pointer-events-none">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
+      <div className="absolute inset-0 bg-surface/40 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
       
-      <div className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden pointer-events-auto animate-in slide-in-from-right duration-300">
-        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-brand-500/10 to-transparent">
+      <div className="relative w-full max-w-md bg-surface border border-outline/10 rounded-3xl shadow-2xl overflow-hidden pointer-events-auto animate-in slide-in-from-right duration-300">
+        <div className="p-6 border-b border-outline/10 flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-brand-500/20 flex items-center justify-center">
-              <Bell className="h-5 w-5 text-brand-500" />
+            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <Bell className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Notificaciones</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-lg font-headline font-black text-on-surface uppercase tracking-tight">Notificaciones</h2>
+              <p className="text-[10px] text-on-surface-variant font-label uppercase font-bold tracking-widest">
                 {notifications.filter(n => !n.read).length} nuevas
               </p>
             </div>
@@ -101,7 +101,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
             {notifications.some(n => !n.read) && (
               <button 
                 onClick={markAllAsRead}
-                className="p-2 hover:bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors"
+                className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-on-surface transition-colors"
                 title="Marcar todas como leídas"
               >
                 <Check className="h-5 w-5" />
@@ -109,7 +109,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
             )}
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors"
+              className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-on-surface transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -119,30 +119,30 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
         <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
           {loading ? (
             <div className="p-12 text-center">
-              <div className="h-8 w-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-500 text-sm">Cargando...</p>
+              <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-on-surface-variant text-xs font-label uppercase tracking-widest">Cargando...</p>
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-12 text-center">
-              <Bell className="h-12 w-12 text-gray-800 mx-auto mb-4" />
-              <p className="text-gray-400 font-medium">No tienes notificaciones</p>
-              <p className="text-gray-600 text-xs mt-1">Te avisaremos cuando haya novedades</p>
+              <Bell className="h-12 w-12 text-surface-variant mx-auto mb-4" />
+              <p className="text-on-surface font-headline font-black uppercase tracking-tight">No tienes notificaciones</p>
+              <p className="text-on-surface-variant text-[10px] mt-1 font-label uppercase tracking-widest">Te avisaremos cuando haya novedades</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-outline/10">
               {notifications.map((notification) => (
                 <div 
                   key={notification.id}
-                  className={`p-5 transition-colors group relative ${notification.read ? 'opacity-60' : 'bg-brand-500/5'}`}
+                  className={`p-5 transition-colors group relative ${notification.read ? 'opacity-60' : 'bg-primary/5'}`}
                   onClick={() => !notification.read && markAsRead(notification.id)}
                 >
                   <div className="flex gap-4">
-                    <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${notification.read ? 'bg-transparent' : 'bg-brand-500 shadow-[0_0_8px_rgba(255,51,51,0.5)]'}`} />
+                    <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${notification.read ? 'bg-transparent' : 'bg-primary shadow-[0_0_8px_#b6a0ff]'}`} />
                     <div className="flex-1">
-                      <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-white font-medium'}`}>
+                      <p className={`text-sm leading-relaxed font-label ${notification.read ? 'text-on-surface-variant' : 'text-on-surface font-medium'}`}>
                         {notification.message}
                       </p>
-                      <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-500">
+                      <div className="flex items-center gap-3 mt-2 text-[10px] text-on-surface-variant font-label uppercase tracking-widest font-bold">
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatDate(notification.created_at)}
@@ -154,7 +154,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
                         e.stopPropagation();
                         deleteNotification(notification.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/20 rounded-lg text-gray-500 hover:text-red-500 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-error/20 rounded-lg text-on-surface-variant hover:text-error transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -165,9 +165,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose 
           )}
         </div>
         
-        <div className="p-4 bg-white/5 border-t border-white/10 text-center">
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-            SAM IA NOTIFICATIONS
+        <div className="p-4 bg-surface-variant/30 border-t border-outline/10 text-center">
+          <p className="text-[10px] text-on-surface-variant uppercase tracking-[0.3em] font-headline font-black italic">
+            AETHER PROTECT
           </p>
         </div>
       </div>

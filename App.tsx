@@ -670,7 +670,7 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-screen bg-surface text-on-surface font-body selection:bg-primary/30">
       <Navbar 
         onAddClick={() => { setSelectedMovie(null); setCurrentView(ViewState.ADD_MOVIE); }}
         onHomeClick={() => { setCurrentView(ViewState.HOME); setSearchTerm(''); }}
@@ -688,14 +688,14 @@ const App = () => {
       {isSamProtectEnabled && <SamIAProtect />}
       
       {!isSamProtectEnabled && isAdmin && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-fade-in-up pointer-events-none">
-          <div className="bg-red-900/40 backdrop-blur-md border border-red-500/30 rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
-            <div className="bg-red-500/20 p-2 rounded-full shrink-0">
-              <AlertTriangle className="h-5 w-5 text-red-500 animate-pulse" />
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-fade-in-up pointer-events-none">
+          <div className="bg-error-container/40 backdrop-blur-md border border-error/30 rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_30px_rgba(255,110,132,0.15)]">
+            <div className="bg-error/20 p-2 rounded-full shrink-0">
+              <AlertTriangle className="h-5 w-5 text-error animate-pulse" />
             </div>
             <div>
-              <h4 className="text-red-500 font-bold text-xs uppercase tracking-wider">Advertencia de Seguridad</h4>
-              <p className="text-red-200/80 text-[10px] sm:text-xs">SAM IA Protect desactivado. Los usuarios ven la página caída.</p>
+              <h4 className="text-error font-headline font-bold text-xs uppercase tracking-wider">Advertencia de Seguridad</h4>
+              <p className="text-on-error-container/80 text-[10px] sm:text-xs">AETHER PROTECT desactivado. Los usuarios ven la página caída.</p>
             </div>
           </div>
         </div>
@@ -709,19 +709,18 @@ const App = () => {
       )}
 
       {!isSamProtectEnabled && !isAdmin ? (
-        <div className="fixed inset-0 z-40 bg-[#050505] flex flex-col items-center justify-center p-4 text-center pt-20">
-           <AlertTriangle className="h-24 w-24 text-red-600 mb-8 animate-pulse" />
-           <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter">503 SERVICE UNAVAILABLE</h1>
-           <p className="text-red-500 font-mono text-sm md:text-base max-w-lg mb-8">
-             [FATAL ERROR]: SAM IA Protect subsystem is offline. 
-             Access to the catalog and streaming servers has been halted to prevent unauthorized breaches.
-           </p>
-           <div className="p-6 border border-red-900/50 bg-red-900/10 rounded-lg font-mono text-xs md:text-sm text-red-400/70 text-left w-full max-w-2xl shadow-[0_0_30px_rgba(239,68,68,0.1)]">
-              <p>{">"} Initializing secure connection... <span className="text-red-500">FAILED</span></p>
-              <p>{">"} Ping media servers... <span className="text-red-500">TIMEOUT</span></p>
-              <p>{">"} Fetching catalog data... <span className="text-red-500">BLOCKED BY FIREWALL</span></p>
-              <p>{">"} Verifying security tokens... <span className="text-red-500">NULL</span></p>
-              <p className="animate-pulse mt-4 text-red-500 font-bold">_ System locked. Please contact administrator.</p>
+        <div className="fixed inset-0 z-40 bg-surface flex flex-col items-center justify-center p-4 text-center pt-20">
+           <AlertTriangle className="h-24 w-24 text-error mb-8 animate-pulse" />
+           <h1 className="text-4xl md:text-6xl font-headline font-black text-on-surface mb-4 tracking-tighter uppercase italic">503 SERVICE UNAVAILABLE</h1>
+           <p className="text-primary font-label font-black text-sm md:text-base max-w-lg mb-8 uppercase tracking-widest">
+             [FATAL ERROR]: AETHER PROTECT subsystem is offline. 
+             Access to the catalog and streaming servers has been halted to prevent unauthorized breaches.\n           </p>
+           <div className="p-6 border border-primary/20 bg-primary/5 rounded-xl font-mono text-xs md:text-sm text-on-surface/70 text-left w-full max-w-2xl shadow-[0_0_50px_rgba(182,160,255,0.1)] backdrop-blur-sm">
+              <p>{">"} Initializing secure connection... <span className="text-error">FAILED</span></p>
+              <p>{">"} Ping media servers... <span className="text-error">TIMEOUT</span></p>
+              <p>{">"} Fetching catalog data... <span className="text-error">BLOCKED BY FIREWALL</span></p>
+              <p>{">"} Verifying security tokens... <span className="text-error">NULL</span></p>
+              <p className="animate-pulse mt-4 text-primary font-bold uppercase tracking-widest">_ System locked. Please contact administrator.</p>
            </div>
         </div>
       ) : (
@@ -766,7 +765,7 @@ const App = () => {
 
       {currentView === ViewState.MY_LIST && (
         <div className="pt-24 px-4 sm:px-8 min-h-screen">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 font-display">Mi Lista</h2>
+            <h2 className="text-2xl sm:text-3xl font-headline font-black mb-6 uppercase tracking-tighter italic">Mi Lista</h2>
             {myListMovies.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {myListMovies.map(movie => (
@@ -774,7 +773,7 @@ const App = () => {
                     ))}
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
+                <div className="flex flex-col items-center justify-center h-[50vh] text-on-surface-variant font-label uppercase tracking-widest">
                     <p className="text-lg">Tu lista está vacía</p>
                 </div>
             )}
@@ -788,42 +787,38 @@ const App = () => {
            {/* PENDING REQUEST BANNER */}
            {pendingRequest && (
                <div className="px-4 md:px-12 mt-4 mb-4 relative z-20 animate-fade-in-up">
-                   <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl ${
-                       pendingRequest.status === 'reviewing' ? 'bg-blue-900/40 border-blue-500/30' :
-                       pendingRequest.status === 'accepted' ? 'bg-green-900/40 border-green-500/30' :
-                       'bg-red-900/40 border-red-500/30'
+                   <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl backdrop-blur-md ${
+                       pendingRequest.status === 'reviewing' ? 'bg-primary/10 border-primary/30' :
+                       pendingRequest.status === 'accepted' ? 'bg-secondary/10 border-secondary/30' :
+                       'bg-error-container/10 border-error/30'
                    }`}>
                        <div className="flex items-center gap-4">
                            <div className={`p-3 rounded-full ${
-                               pendingRequest.status === 'reviewing' ? 'bg-blue-500/20 text-blue-400 animate-pulse' :
-                               pendingRequest.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
-                               'bg-red-500/20 text-red-400'
+                               pendingRequest.status === 'reviewing' ? 'bg-primary/20 text-primary animate-pulse' :
+                               pendingRequest.status === 'accepted' ? 'bg-secondary/20 text-secondary' :
+                               'bg-error-container/20 text-error'
                            }`}>
                                {pendingRequest.status === 'reviewing' ? <Loader2 className="h-6 w-6 animate-spin" /> :
                                 pendingRequest.status === 'accepted' ? <CheckCircle2 className="h-6 w-6" /> :
                                 <XCircle className="h-6 w-6" />}
                            </div>
                            <div>
-                               <h3 className="font-bold text-lg text-white">
-                                   {pendingRequest.status === 'reviewing' ? 'SAM IA está revisando tu solicitud' :
-                                    pendingRequest.status === 'accepted' ? '¡Solicitud Aceptada por SAM IA!' :
-                                    'Solicitud Rechazada'}
-                               </h3>
-                               <p className="text-sm text-gray-300">
-                                   {pendingRequest.status === 'reviewing' ? `Estamos evaluando agregar "${pendingRequest.title}" al catálogo. Tendrás respuesta cuando sea revisada.` :
-                                    pendingRequest.status === 'accepted' ? `"${pendingRequest.title}" ha sido aprobada y pronto estará disponible.` :
-                                    `Lo sentimos, no pudimos aprobar "${pendingRequest.title}" en este momento.`}
+                               <h4 className="text-on-surface font-headline font-black text-sm uppercase tracking-tight italic">
+                                   {pendingRequest.status === 'reviewing' ? 'Solicitud en Revisión' :
+                                    pendingRequest.status === 'accepted' ? 'Solicitud Aceptada' : 'Solicitud Rechazada'}
+                               </h4>
+                               <p className="text-on-surface-variant text-[10px] font-label uppercase tracking-widest font-bold">
+                                   {pendingRequest.title} • {pendingRequest.status === 'reviewing' ? 'SAM IA está procesando tu pedido' : 
+                                    pendingRequest.status === 'accepted' ? '¡Pronto estará disponible en el catálogo!' : 'No pudimos procesar tu pedido esta vez'}
                                </p>
                            </div>
                        </div>
-                       {pendingRequest.status !== 'reviewing' && (
-                           <button 
-                               onClick={clearPendingRequest}
-                               className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-colors whitespace-nowrap"
-                           >
-                               Entendido
-                           </button>
-                       )}
+                       <button 
+                           onClick={clearPendingRequest}
+                           className="px-4 py-2 bg-on-surface/5 hover:bg-on-surface/10 rounded-lg text-[10px] font-label font-black uppercase tracking-widest transition-all"
+                       >
+                           Cerrar Aviso
+                       </button>
                    </div>
                </div>
            )}

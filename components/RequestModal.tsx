@@ -118,13 +118,13 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
   if (success) {
       return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-[#1a1c22] rounded-2xl w-full max-w-md border border-white/10 p-12 flex flex-col items-center text-center animate-fade-in">
-                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
-                    <CheckCircle2 className="h-10 w-10 text-green-500" />
+            <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-surface rounded-2xl w-full max-w-md border border-outline/10 p-12 flex flex-col items-center text-center animate-fade-in">
+                <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="h-10 w-10 text-secondary" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2">¡Solicitud Enviada!</h2>
-                <p className="text-gray-400">El administrador revisará tu petición pronto.</p>
+                <h2 className="text-2xl font-headline font-black text-on-surface mb-2 uppercase tracking-tight">¡Solicitud Enviada!</h2>
+                <p className="text-on-surface-variant font-label">El administrador revisará tu petición pronto.</p>
             </div>
         </div>
       );
@@ -132,51 +132,51 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative bg-[#1a1c22] rounded-2xl w-full max-w-md border border-white/10 shadow-2xl flex flex-col animate-fade-in overflow-hidden">
+      <div className="relative bg-surface rounded-2xl w-full max-w-md border border-outline/10 shadow-2xl flex flex-col animate-fade-in overflow-hidden">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-brand-900 to-[#1a1c22] p-6 border-b border-white/5 flex justify-between items-start">
+        <div className="bg-gradient-to-r from-primary/10 to-transparent p-6 border-b border-outline/10 flex justify-between items-start">
             <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <MessageSquarePlus className="h-6 w-6 text-brand-500" />
+                <h2 className="text-xl font-headline font-black text-on-surface flex items-center gap-2 uppercase italic">
+                    <MessageSquarePlus className="h-6 w-6 text-primary" />
                     Solicitar Contenido
                 </h2>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-on-surface-variant mt-1 font-label uppercase tracking-wider">
                     ¿No encuentras lo que buscas? Pídelo aquí.
                 </p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X className="h-6 w-6" />
             </button>
         </div>
 
         <div className="p-6 space-y-5">
             <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Título de la Película / Serie</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-1.5 uppercase tracking-widest">Título de la Película / Serie</label>
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none placeholder-gray-600 transition-all"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary outline-none placeholder-on-surface-variant/30 transition-all font-bold"
                     placeholder="Ej: Breaking Bad"
                     autoFocus
                 />
             </div>
 
             <div>
-                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Tipo de Contenido</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-2 uppercase tracking-widest">Tipo de Contenido</label>
                 <div className="grid grid-cols-2 gap-3">
                     <button 
                         onClick={() => setType('Película')}
-                        className={`flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${type === 'Película' ? 'bg-brand-500 text-white border-brand-500 shadow-lg' : 'bg-[#0f1014] text-gray-400 border-white/10 hover:border-white/30'}`}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-lg border transition-all font-label font-bold uppercase tracking-wider text-xs ${type === 'Película' ? 'bg-primary text-on-primary border-primary shadow-lg' : 'bg-surface-variant/50 text-on-surface-variant border-outline/10 hover:border-outline/30'}`}
                     >
                         <Film className="h-4 w-4" /> Película
                     </button>
                     <button 
                         onClick={() => setType('Serie')}
-                        className={`flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${type === 'Serie' ? 'bg-brand-500 text-white border-brand-500 shadow-lg' : 'bg-[#0f1014] text-gray-400 border-white/10 hover:border-white/30'}`}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-lg border transition-all font-label font-bold uppercase tracking-wider text-xs ${type === 'Serie' ? 'bg-primary text-on-primary border-primary shadow-lg' : 'bg-surface-variant/50 text-on-surface-variant border-outline/10 hover:border-outline/30'}`}
                     >
                         <Tv className="h-4 w-4" /> Serie
                     </button>
@@ -184,29 +184,29 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
             </div>
 
             <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Nota Adicional (Opcional)</label>
+                <label className="block text-[10px] font-label font-black text-on-surface-variant mb-1.5 uppercase tracking-widest">Nota Adicional (Opcional)</label>
                 <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    className="w-full bg-[#0f1014] border border-white/10 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 outline-none h-24 resize-none placeholder-gray-600 transition-all"
+                    className="w-full bg-surface-variant/50 border border-outline/10 rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary outline-none h-24 resize-none placeholder-on-surface-variant/30 transition-all text-sm"
                     placeholder="Año, Temporada específica, idioma..."
                 />
             </div>
 
             {!user && (
-                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex flex-col gap-3 mb-4">
+                <div className="p-4 bg-secondary/10 border border-secondary/20 rounded-xl flex flex-col gap-3 mb-4">
                     <div className="flex items-center gap-3">
-                        <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
-                        <p className="text-xs text-yellow-200">
+                        <AlertCircle className="h-5 w-5 text-secondary shrink-0" />
+                        <p className="text-[10px] text-secondary font-bold uppercase tracking-tight">
                             Debes iniciar sesión para poder enviar solicitudes.
                         </p>
                     </div>
                     <button 
                         onClick={onLoginClick}
-                        className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition-all"
+                        className="w-full py-2 bg-secondary hover:bg-secondary/80 text-on-secondary font-headline font-black rounded-lg text-xs flex items-center justify-center gap-2 transition-all uppercase tracking-widest"
                     >
                         <LogIn className="h-4 w-4" />
-                        Iniciar Sesión para Pedir
+                        Iniciar Sesión
                     </button>
                 </div>
             )}
@@ -214,15 +214,15 @@ export const RequestModal: React.FC<RequestModalProps> = ({ onClose, onLoginClic
             <button 
                 onClick={handleSend}
                 disabled={!title || loading || !user}
-                className={`w-full py-3.5 rounded-lg font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all mt-2
-                    ${title && !loading && user ? 'bg-white text-black hover:bg-gray-200 hover:scale-[1.02]' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+                className={`w-full py-4 rounded-xl font-headline font-black text-on-surface shadow-lg flex items-center justify-center gap-2 transition-all mt-2 uppercase tracking-widest
+                    ${title && !loading && user ? 'bg-on-surface text-surface hover:brightness-110 hover:scale-[1.02]' : 'bg-surface-variant text-on-surface-variant cursor-not-allowed'}
                 `}
             >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-4 w-4" />}
                 {loading ? 'Enviando...' : user ? 'Enviar Solicitud' : 'Inicia sesión primero'}
             </button>
             
-            <p className="text-[10px] text-center text-gray-500">
+            <p className="text-[9px] text-center text-on-surface-variant font-label uppercase tracking-widest font-medium">
                 Tu solicitud será enviada directamente al panel del administrador.
             </p>
         </div>
